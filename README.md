@@ -7,7 +7,7 @@ Versioned configuration and tooling for routing Codex work to GPT-5.6 subagents 
 - An `AGENTS.md` policy that routes work by task-specific capability, intelligence, and cost efficiency.
 - Native Codex subagent definitions for GPT-5.6-Sol, GPT-5.6-Terra, and GPT-5.6-Luna at high reasoning effort.
 - A PowerShell 7 wrapper that resolves stable Gemini aliases and runs exactly one stateless Antigravity task.
-- A collision-safe installer that copies a selected immutable version into `$HOME\.codex`.
+- A collision-safe installer that copies the configuration for a selected GPT generation into `$HOME\.codex`.
 
 The orchestrating Codex agent remains responsible for architecture, critical logic, security, integration, final acceptance, Git branches, worktrees, commits, and cleanup. Delegated agents work from explicit, self-contained task contracts.
 
@@ -22,6 +22,8 @@ codex-gemini-orchestrator/
 ├─ SECURITY.md
 ├─ .gitignore
 ├─ install.ps1
+├─ tests/
+│  └─ Invoke-AntigravityAgent.Tests.ps1
 └─ versions/
    └─ 5.6/
       ├─ AGENTS.md
@@ -35,9 +37,9 @@ codex-gemini-orchestrator/
 
 ## Version policy
 
-`versions/5.6/` is the current compatibility line. It supports the GPT-5.6 family and Gemini 3.5 Flash while retaining the Gemini 3.1 Pro alias present in the routing baseline.
+The directory version identifies the supported GPT generation, not the project release version. `versions/5.6/` means that the routing configuration supports the GPT-5.6 family; it also supports Gemini 3.5 Flash while retaining the Gemini 3.1 Pro alias present in the routing baseline.
 
-Published version directories are immutable. A major model or routing-table update must be added as a new directory, such as `versions/6.0/`; never overwrite an older directory. The installer selects one directory explicitly, so existing users can reproduce or reinstall the exact policy they chose. Root-level documentation and installer maintenance do not change a versioned routing snapshot.
+Bug fixes, security hardening, documentation corrections, and wrapper compatibility repairs are applied within the existing GPT-generation directory. A new GPT generation and its corresponding routing-table update must be added as a new directory, such as `versions/6.0/` for GPT-6.0. Do not create a new version directory merely to release a project bug fix.
 
 ## Model routing
 
@@ -119,6 +121,8 @@ Codex should first create a temporary branch, an isolated worktree, and a comple
 
 Supported stable aliases in version 5.6 are `gemini-3.5-flash` and `gemini-3.1-pro`. The wrapper requires exactly one matching High model from `agy models`; it never silently substitutes a different model.
 
+The wrapper passes the resolved worktree through Antigravity's `--add-dir` option and sets `--print-timeout 10m`. If another process supervises the wrapper, its outer timeout must be longer than ten minutes so Antigravity can return its own exit code.
+
 Omit `-AutoApprove` to keep Antigravity's configured permission flow. With `-AutoApprove`, the wrapper passes Antigravity's permission-skipping flag, so use it only inside a disposable, correctly scoped worktree after reviewing the task contract.
 
 ## Security
@@ -128,3 +132,9 @@ Never place credentials, API keys, tokens, cookies, secrets, or private data in 
 ## Contributing and license
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) before proposing routing or version changes. This project is available under the [MIT License](LICENSE).
+
+Run the wrapper regression test with:
+
+```powershell
+pwsh -NoProfile -File .\tests\Invoke-AntigravityAgent.Tests.ps1
+```

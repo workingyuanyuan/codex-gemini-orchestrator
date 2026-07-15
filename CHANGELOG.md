@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented in this file.
 
-The version directory identifies a model-and-routing compatibility line. Published directories are immutable; a major model or routing update is released in a new directory rather than replacing an old one.
+The version directory identifies the supported GPT generation, not the project release version. In-generation bug fixes are applied in place; a new GPT generation receives a new directory.
 
 ## [5.6] - 2026-07-15
 
@@ -14,3 +14,9 @@ The version directory identifies a model-and-routing compatibility line. Publish
 - Git branch and worktree isolation contract for delegated tasks.
 - PowerShell 7 installer with safe collision handling and explicit `-Force` replacement.
 - Public documentation, contribution guidance, security policy, and MIT license.
+
+### Fixed
+
+- Bound Antigravity sessions to the resolved Git worktree with `--add-dir`.
+- Set an explicit ten-minute Antigravity print timeout so supervising processes can use a longer, coordinated outer timeout.
+- Clarified that `5.6` represents GPT-5.6 support and does not prevent in-version project bug fixes.

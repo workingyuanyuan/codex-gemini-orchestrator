@@ -6,8 +6,9 @@ Runs one stateless Antigravity CLI task in an existing isolated Git worktree.
 .DESCRIPTION
 The orchestrating Codex agent owns worktree creation, integration, commits, and cleanup.
 This wrapper validates the worktree and UTF-8 task contract, resolves a stable Gemini
-alias against `agy models`, then runs a single non-interactive Antigravity session.
-It writes no log files and returns the Antigravity process exit code.
+alias against `agy models`, explicitly attaches the resolved worktree, then runs a
+single non-interactive Antigravity session with a ten-minute print timeout. It writes
+no log files and returns the Antigravity process exit code.
 
 .EXAMPLE
 & "$HOME\.codex\scripts\Invoke-AntigravityAgent.ps1" `
@@ -120,7 +121,12 @@ if ($resolvedModels.Count -ne 1) {
 }
 $resolvedModel = $resolvedModels[0]
 
-$agyArguments = @('--model', $resolvedModel, '-p', $prompt)
+$agyArguments = @(
+    '--add-dir', $worktreePath,
+    '--print-timeout', '10m',
+    '--model', $resolvedModel,
+    '-p', $prompt
+)
 if ($AutoApprove) {
     $agyArguments = @('--dangerously-skip-permissions') + $agyArguments
 }

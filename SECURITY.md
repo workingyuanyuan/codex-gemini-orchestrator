@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Security fixes are evaluated for the current documented compatibility line. Versioned snapshots remain immutable so users can audit exactly what they installed; a correction that changes versioned behavior is published as a new version directory with migration notes.
+Version directories identify supported GPT generations, not project releases. Security and compatibility fixes are applied within the affected generation directory. A new directory is reserved for support of a new GPT generation and its corresponding routing configuration.
 
 | Version | Supported |
 | --- | --- |

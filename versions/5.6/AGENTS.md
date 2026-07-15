@@ -58,6 +58,8 @@ Call:
 
 Omit `-AutoApprove` when Antigravity's configured permission flow should remain in effect. Never silently substitute another model when the requested alias cannot be resolved uniquely.
 
+The wrapper attaches the resolved worktree with Antigravity's `--add-dir` option and uses a ten-minute print timeout. Any process supervising the wrapper must use an outer timeout longer than ten minutes so Antigravity can return its own exit code.
+
 ## Delegation contract and isolation
 
 - Every delegation is a **single, stateless, self-contained task**. Do not depend on a previous Antigravity conversation.

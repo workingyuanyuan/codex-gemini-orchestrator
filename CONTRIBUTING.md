@@ -12,9 +12,9 @@ Thank you for helping improve `codex-gemini-orchestrator`.
 
 ## Versioned changes
 
-Published directories under `versions/` are immutable. Do not edit `versions/5.6/` to introduce new models, scores, routing rules, aliases, or behavior. Create a new version directory—such as `versions/6.0/`—for a major model or routing-table update, copy the complete required file set, and update the root documentation and changelog.
+Directories under `versions/` identify supported GPT generations, not project release versions. Apply bug fixes, security hardening, documentation corrections, and compatibility repairs inside the existing generation directory. Create a new directory—such as `versions/6.0/`—when adding GPT-6.0 and its corresponding routing table; do not create a new directory merely for a project bug fix.
 
-The model scores and routing policy are deliberate inputs. A pull request that changes them must explain the evidence, compatibility impact, and why a new version line is appropriate. Do not average the capability dimensions into a new composite or trade away the task-specific quality threshold for cost.
+The model scores and routing policy are deliberate inputs. A pull request that changes them must explain the evidence and compatibility impact. Do not average the capability dimensions into a new composite or trade away the task-specific quality threshold for cost.
 
 ## Development workflow
 
@@ -22,7 +22,7 @@ The model scores and routing policy are deliberate inputs. A pull request that c
 2. Keep the change focused and avoid unrelated cleanup.
 3. Update documentation and `CHANGELOG.md` when behavior or compatibility changes.
 4. Validate every TOML file with a TOML 1.0 parser.
-5. Parse every `.ps1` file with PowerShell 7 and test changed installer behavior in a disposable home directory.
+5. Parse every `.ps1` file with PowerShell 7 and run `pwsh -NoProfile -File .\tests\Invoke-AntigravityAgent.Tests.ps1`.
 6. Confirm README parameter names, paths, and examples match the scripts.
 7. Review the complete diff for secrets and machine-specific data.
 8. Open a pull request that includes the commands run and their results.
