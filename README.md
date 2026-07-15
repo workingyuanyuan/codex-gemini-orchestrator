@@ -1,0 +1,130 @@
+# codex-gemini-orchestrator
+
+Versioned configuration and tooling for routing Codex work to GPT-5.6 subagents and making one-shot Gemini calls through the official Antigravity CLI. Gemini uses the user's existing authenticated Antigravity subscription session—no Gemini API key is requested or used.
+
+## What this project provides
+
+- An `AGENTS.md` policy that routes work by task-specific capability, intelligence, and cost efficiency.
+- Native Codex subagent definitions for GPT-5.6-Sol, GPT-5.6-Terra, and GPT-5.6-Luna at high reasoning effort.
+- A PowerShell 7 wrapper that resolves stable Gemini aliases and runs exactly one stateless Antigravity task.
+- A collision-safe installer that copies a selected immutable version into `$HOME\.codex`.
+
+The orchestrating Codex agent remains responsible for architecture, critical logic, security, integration, final acceptance, Git branches, worktrees, commits, and cleanup. Delegated agents work from explicit, self-contained task contracts.
+
+## Repository layout
+
+```text
+codex-gemini-orchestrator/
+├─ README.md
+├─ CHANGELOG.md
+├─ LICENSE
+├─ CONTRIBUTING.md
+├─ SECURITY.md
+├─ .gitignore
+├─ install.ps1
+└─ versions/
+   └─ 5.6/
+      ├─ AGENTS.md
+      ├─ agents/
+      │  ├─ gpt-5-6-sol-high.toml
+      │  ├─ gpt-5-6-terra-high.toml
+      │  └─ gpt-5-6-luna-high.toml
+      └─ scripts/
+         └─ Invoke-AntigravityAgent.ps1
+```
+
+## Version policy
+
+`versions/5.6/` is the current compatibility line. It supports the GPT-5.6 family and Gemini 3.5 Flash while retaining the Gemini 3.1 Pro alias present in the routing baseline.
+
+Published version directories are immutable. A major model or routing-table update must be added as a new directory, such as `versions/6.0/`; never overwrite an older directory. The installer selects one directory explicitly, so existing users can reproduce or reinstall the exact policy they chose. Root-level documentation and installer maintenance do not change a versioned routing snapshot.
+
+## Model routing
+
+The authoritative scores and complete policy are in [`versions/5.6/AGENTS.md`](versions/5.6/AGENTS.md). Routing follows this order:
+
+1. Meet the task-specific capability threshold.
+2. Prefer the higher Intelligence score among qualifying models.
+3. Use Cost Efficiency only as a tie-breaker after the quality threshold is met.
+
+Bulk, mechanical, and user-facing work defaults to Gemini 3.5 Flash when it meets the task contract. Core architecture, critical logic, security, integration, and final acceptance stay with the orchestrating Codex agent. Native Codex workers provide GPT-5.6-Sol, GPT-5.6-Terra, and GPT-5.6-Luna profiles.
+
+Cost never justifies shipping a lower-quality result. If a cheaper model's result fails acceptance, rerun or redo the work with a better-suited model. If the real failure is an ambiguous contract, missing repository context, a broken environment, or invalid acceptance criteria, correct that cause before changing models.
+
+## Isolation and delegation
+
+Every Gemini delegation is single-shot, stateless, and self-contained. The orchestrator creates a temporary branch and one isolated Git worktree per task, supplies a UTF-8 task contract, reviews the complete diff and validation evidence, integrates only accepted changes, and removes the worktree.
+
+The wrapper does not create, commit, merge, rebase, push, release, or deploy. Gemini may modify only its assigned worktree and must not use a previous Antigravity conversation as hidden state. Parallel work is safe only when file ownership and public contracts do not overlap.
+
+## Prerequisites
+
+- Windows 10 or Windows 11.
+- PowerShell 7 (`pwsh`). PowerShell 5.1 is not supported.
+- Git.
+- Codex CLI with support for native subagent definitions under `$HOME\.codex\agents`.
+- The official Antigravity CLI, including the `agy` command.
+- An authenticated Antigravity subscription session that can list the configured Gemini models.
+
+No Gemini API key is needed. Do not add one to this repository or to task contracts.
+
+## Installation
+
+Clone the repository and run the installer from its root in PowerShell 7:
+
+```powershell
+git clone https://github.com/OWNER/codex-gemini-orchestrator.git
+Set-Location .\codex-gemini-orchestrator
+pwsh -NoProfile -File .\install.ps1 -Version 5.6
+```
+
+Replace `OWNER` with the GitHub account or organization that hosts the repository.
+
+The installer copies:
+
+| Source | Destination |
+| --- | --- |
+| `versions/5.6/AGENTS.md` | `$HOME\.codex\AGENTS.md` |
+| `versions/5.6/agents/*.toml` | `$HOME\.codex\agents\` |
+| `versions/5.6/scripts/*.ps1` | `$HOME\.codex\scripts\` |
+
+The default is fail-safe: if any destination file already exists, installation stops before copying anything. Review the collision list first. Only an explicit `-Force` permits those managed files to be replaced:
+
+```powershell
+pwsh -NoProfile -File .\install.ps1 -Version 5.6 -Force
+```
+
+`-Force` does not delete unrelated files.
+
+If local execution policy or a downloaded-file mark blocks the installed wrapper, run:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
+Unblock-File "$HOME\.codex\scripts\Invoke-AntigravityAgent.ps1"
+```
+
+The installer does not change execution policy and does not run installed code. If you digitally sign either PowerShell script, every subsequent modification invalidates the signature and the modified script must be signed again.
+
+## One-shot Gemini usage
+
+Codex should first create a temporary branch, an isolated worktree, and a complete UTF-8 task contract. It can then call:
+
+```powershell
+& "$HOME\.codex\scripts\Invoke-AntigravityAgent.ps1" `
+  -WorkingDirectory "C:\path\to\isolated-worktree" `
+  -Model gemini-3.5-flash `
+  -PromptFile "C:\path\to\task-contract.md" `
+  -AutoApprove
+```
+
+Supported stable aliases in version 5.6 are `gemini-3.5-flash` and `gemini-3.1-pro`. The wrapper requires exactly one matching High model from `agy models`; it never silently substitutes a different model.
+
+Omit `-AutoApprove` to keep Antigravity's configured permission flow. With `-AutoApprove`, the wrapper passes Antigravity's permission-skipping flag, so use it only inside a disposable, correctly scoped worktree after reviewing the task contract.
+
+## Security
+
+Never place credentials, API keys, tokens, cookies, secrets, or private data in routing files, task contracts, prompts, logs, commits, or issue reports. See [`SECURITY.md`](SECURITY.md) for vulnerability reporting and supported-version information.
+
+## Contributing and license
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) before proposing routing or version changes. This project is available under the [MIT License](LICENSE).
