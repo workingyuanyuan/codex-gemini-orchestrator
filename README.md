@@ -9,7 +9,7 @@ Versioned configuration and tooling for routing Codex work to GPT-5.6 subagents 
 - A PowerShell 7 wrapper that resolves stable Gemini aliases and runs exactly one stateless Antigravity task.
 - A collision-safe installer that copies the configuration for a selected GPT generation into `$HOME\.codex`.
 
-The orchestrating Codex agent remains responsible for architecture, critical logic, security, integration, final acceptance, Git branches, worktrees, commits, and cleanup. Delegated agents work from explicit, self-contained task contracts.
+The orchestrating Codex agent remains responsible for shared architecture, critical logic, security, integration, final acceptance, Git state, worktree lifecycle, commits, and cleanup. Delegated agents work from explicit, self-contained task contracts.
 
 ## Repository layout
 
@@ -46,16 +46,16 @@ Bug fixes, security hardening, documentation corrections, and wrapper compatibil
 The authoritative scores and complete policy are in [`versions/5.6/AGENTS.md`](versions/5.6/AGENTS.md). Routing follows this order:
 
 1. Meet the task-specific capability threshold.
-2. Prefer the higher Intelligence score among qualifying models.
-3. Use Cost Efficiency only as a tie-breaker after the quality threshold is met.
+2. Among qualifying models, prefer higher Cost Efficiency.
+3. Use Intelligence only when task-specific fit remains unclear.
 
-Bulk, mechanical, and user-facing work defaults to Gemini 3.5 Flash when it meets the task contract. Core architecture, critical logic, security, integration, and final acceptance stay with the orchestrating Codex agent. Native Codex workers provide GPT-5.6-Sol, GPT-5.6-Terra, and GPT-5.6-Luna profiles.
+Bounded, objectively verifiable implementation; repetitive edits; migrations; frontend/UI; documentation and copy; data transformation; and straightforward coding default to Gemini 3.5 Flash. Dense specifications, instruction- or language-heavy work, and difficult quantitative work suitable for an external worker default to Gemini 3.1 Pro. Native Codex worker selection follows each custom agent's TOML `description`: Sol handles high-risk and cross-cutting work, Terra handles read-heavy analysis and bounded moderate-complexity changes, and Luna handles low-risk fully specified implementation and mechanical edits.
 
-Cost never justifies shipping a lower-quality result. If a cheaper model's result fails acceptance, rerun or redo the work with a better-suited model. If the real failure is an ambiguous contract, missing repository context, a broken environment, or invalid acceptance criteria, correct that cause before changing models.
+The orchestrator retains shared architectural decisions and final acceptance. If a worker fails acceptance, correct an incomplete contract, missing repository context, broken environment, or invalid acceptance criteria before making one targeted repair attempt or escalating to a model stronger in the failed capability.
 
 ## Isolation and delegation
 
-Every Gemini delegation is single-shot, stateless, and self-contained. The orchestrator creates a temporary branch and one isolated Git worktree per task, supplies a UTF-8 task contract, reviews the complete diff and validation evidence, integrates only accepted changes, and removes the worktree.
+Every Gemini delegation is single-shot, stateless, and self-contained. For write tasks, the orchestrator uses a runtime-provided isolated worktree or creates a detached worktree from the current `HEAD`; no temporary branch is created. It supplies a UTF-8 task contract, reviews the complete diff and validation evidence, integrates only accepted changes, and removes the worktree.
 
 The wrapper does not create, commit, merge, rebase, push, release, or deploy. Gemini may modify only its assigned worktree and must not use a previous Antigravity conversation as hidden state. Parallel work is safe only when file ownership and public contracts do not overlap.
 
@@ -75,12 +75,10 @@ No Gemini API key is needed. Do not add one to this repository or to task contra
 Clone the repository and run the installer from its root in PowerShell 7:
 
 ```powershell
-git clone https://github.com/OWNER/codex-gemini-orchestrator.git
+git clone https://github.com/workingyuanyuan/codex-gemini-orchestrator.git
 Set-Location .\codex-gemini-orchestrator
 pwsh -NoProfile -File .\install.ps1 -Version 5.6
 ```
-
-Replace `OWNER` with the GitHub account or organization that hosts the repository.
 
 The installer copies:
 
@@ -109,7 +107,7 @@ The installer does not change execution policy and does not run installed code. 
 
 ## One-shot Gemini usage
 
-Codex should first create a temporary branch, an isolated worktree, and a complete UTF-8 task contract. It can then call:
+Codex should first obtain an isolated worktree, or create a detached worktree from the current `HEAD`, and prepare a complete UTF-8 task contract outside the repository. It can then call:
 
 ```powershell
 & "$HOME\.codex\scripts\Invoke-AntigravityAgent.ps1" `

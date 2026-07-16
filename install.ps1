@@ -4,7 +4,7 @@
 Installs a versioned Codex multi-model orchestration configuration.
 
 .DESCRIPTION
-Copies one immutable version snapshot into the current user's .codex directory.
+Copies one versioned configuration snapshot into the current user's .codex directory.
 Existing destination files are never overwritten unless -Force is specified.
 
 .PARAMETER Version

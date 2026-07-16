@@ -4,6 +4,15 @@ All notable changes to this project are documented in this file.
 
 The version directory identifies the supported GPT generation, not the project release version. In-generation bug fixes are applied in place; a new GPT generation receives a new directory.
 
+## [Unreleased]
+
+### Changed
+
+- Refined native Codex worker descriptions and instructions so Sol, Terra, and Luna advertise distinct risk- and task-based routing roles.
+- Updated routing to prefer Cost Efficiency among models that meet the task-specific capability threshold, with Intelligence as a secondary signal.
+- Replaced temporary-branch creation for Gemini write tasks with runtime-provided or detached isolated worktrees.
+- Required temporary delegation contracts to remain outside the repository unless they are intended deliverables.
+
 ## [5.6] - 2026-07-15
 
 ### Added
