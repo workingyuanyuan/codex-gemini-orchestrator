@@ -78,20 +78,6 @@ Get-Item -LiteralPath $scriptPath |
 
 沒有輸出即代表標記已移除。
 
-## 使用方式
-
-先準備隔離的 Git worktree 與完整 UTF-8 任務契約，再呼叫：
-
-```powershell
-& "$HOME\.codex\scripts\Invoke-AntigravityAgent.ps1" `
-    -WorkingDirectory "C:\path\to\isolated-worktree" `
-    -Model gemini-3.6-flash `
-    -PromptFile "C:\path\to\task-contract.md" `
-    -AutoApprove
-```
-
-只有在任務契約允許指定範圍內的本機寫入時才使用 `-AutoApprove`。Gemini 不應提交、合併、推送、發布或部署；Codex 必須審查輸出並完成最終驗收。
-
 ## 授權與貢獻
 
 本專案採用 [MIT License](LICENSE)。提交變更前請閱讀 [CONTRIBUTING.md](CONTRIBUTING.md)，安全性問題請參閱 [SECURITY.md](SECURITY.md)。
