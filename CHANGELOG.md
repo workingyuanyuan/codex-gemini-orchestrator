@@ -6,8 +6,14 @@ The version directory identifies the supported GPT generation, not the project r
 
 ## [Unreleased]
 
+### Added
+
+- Added the `5.6-gemini3.6flash` snapshot with Gemini 3.6 Flash and Gemini 3.1 Pro routing through the authenticated Antigravity CLI session.
+- Documented how to detect and remove the PowerShell `Zone.Identifier` download-origin mark after downloading or copying the wrapper.
+
 ### Changed
 
+- Marked `5.6-gemini3.5flash` as an archived, deprecated snapshot retained for version history.
 - Refined native Codex worker descriptions and instructions so Sol, Terra, and Luna advertise distinct risk- and task-based routing roles.
 - Updated routing to prefer Cost Efficiency among models that meet the task-specific capability threshold, with Intelligence as a secondary signal.
 - Replaced temporary-branch creation for Gemini write tasks with runtime-provided or detached isolated worktrees.
