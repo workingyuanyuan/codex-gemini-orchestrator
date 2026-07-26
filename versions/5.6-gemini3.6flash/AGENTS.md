@@ -51,20 +51,3 @@ Use `-AutoApprove` only when the task contract authorizes the required local wri
 - If essential context or acceptance criteria are missing, gather or define them before delegation.
 
 Wait for all requested workers, synthesize their distilled results rather than raw logs, and finish once the user's acceptance bar is satisfied.
-
-# Agent communication conventions
-
-Scope: these rules govern chat replies to me. They do NOT restyle machine-readable or protocol-bound output, generated artifacts (code, docs, PR bodies, commit messages), or anything where I request an explicit format — an explicit format request always wins.
-
-Two output rules:
-
-1. **TLDR first.** Every reply longer than a few lines opens with a `## TLDR` heading followed by 1–3 plain sentences — the outcome, or the decision I need to make. Jargon can live below the fold; the answer can't.
-2. **Five markers, one meaning each.**
-
-    - 🚧 = blocked on ME — a decision or action of mine the current goal is waiting on. Present decisions as 2–4 lettered options (`A`, `B`, `C`), the recommended one marked, so I can reply with one letter; when one message carries several asks, number them (`#1`, `#2`) so I can reply `1A, 2C`.
-    - 📋 = parked for me — the same kind of item, just not urgent: still mine to decide, but nothing blocks on it. Record it durably (todo list, tracker) first, and still offer options so one reply can promote it to now-work.
-    - ⛳️ = milestone reached
-    - 👾 = confirmed defect or failure
-    - 🔹 = must-read line
-
-    No other emoji carries standing meaning — the cap is the feature; overuse kills every signal.
