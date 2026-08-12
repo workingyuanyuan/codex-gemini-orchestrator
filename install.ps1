@@ -4,27 +4,28 @@
 Installs a versioned Codex multi-model orchestration configuration.
 
 .DESCRIPTION
-Copies one versioned configuration snapshot into the current user's .codex directory.
-Existing destination files are never overwritten unless -Force is specified.
+Copies one versioned configuration snapshot into the current user's .codex directory,
+including AGENTS.md, native agent profiles, scripts, and bundled skills. Existing
+destination files are never overwritten unless -Force is specified.
 
 .PARAMETER Version
-Version directory to install from versions/. Defaults to 5.6.
+Version directory to install from versions/. Defaults to 5.6-gemini3.6flash.
 
 .PARAMETER Force
 Allows existing destination files to be overwritten. Unrelated files are untouched.
 
 .EXAMPLE
-./install.ps1 -Version 5.6
+./install.ps1 -Version 5.6-gemini3.6flash
 
 .EXAMPLE
-./install.ps1 -Version 5.6 -Force
+./install.ps1 -Version 5.6-gemini3.6flash -Force
 #>
 
 [CmdletBinding()]
 param(
     [Parameter()]
-    [ValidatePattern('^\d+\.\d+$')]
-    [string]$Version = '5.6',
+    [ValidatePattern('^[A-Za-z0-9][A-Za-z0-9.\-]*$')]
+    [string]$Version = '5.6-gemini3.6flash',
 
     [switch]$Force
 )
@@ -63,6 +64,15 @@ if ($scriptFiles.Count -eq 0) {
     throw "Version '$Version' contains no PowerShell scripts."
 }
 
+$skillSourceDirectory = Join-Path $sourceRoot.Path 'skills'
+$skillFiles = @()
+if (Test-Path -LiteralPath $skillSourceDirectory -PathType Container) {
+    $skillFiles = @(
+        Get-ChildItem -LiteralPath $skillSourceDirectory -File -Recurse |
+            Sort-Object FullName
+    )
+}
+
 $sourceFiles = @(
     [pscustomobject]@{
         Source = Join-Path $sourceRoot.Path 'AGENTS.md'
@@ -83,6 +93,24 @@ foreach ($sourceFile in $scriptFiles) {
     $sourceFiles += [pscustomobject]@{
         Source = $sourceFile.FullName
         DestinationDirectory = Join-Path (Join-Path $HOME '.codex') 'scripts'
+        DestinationName = $sourceFile.Name
+    }
+}
+
+$skillsRoot = Join-Path (Join-Path $HOME '.codex') 'skills'
+foreach ($sourceFile in $skillFiles) {
+    $relativePath = [IO.Path]::GetRelativePath($skillSourceDirectory, $sourceFile.FullName)
+    $relativeDirectory = Split-Path -Parent $relativePath
+    $destinationDirectory = if ([string]::IsNullOrEmpty($relativeDirectory)) {
+        $skillsRoot
+    }
+    else {
+        Join-Path $skillsRoot $relativeDirectory
+    }
+
+    $sourceFiles += [pscustomobject]@{
+        Source = $sourceFile.FullName
+        DestinationDirectory = $destinationDirectory
         DestinationName = $sourceFile.Name
     }
 }

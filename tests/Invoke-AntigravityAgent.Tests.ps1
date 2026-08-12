@@ -24,7 +24,7 @@ function Assert-SequenceEqual {
 }
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
-$wrapperPath = Join-Path $repositoryRoot 'versions\5.6\scripts\Invoke-AntigravityAgent.ps1'
+$wrapperPath = Join-Path $repositoryRoot 'versions\5.6-gemini3.6flash\scripts\Invoke-AntigravityAgent.ps1'
 $resolvedRepositoryRoot = (Resolve-Path -LiteralPath $repositoryRoot).Path
 $tempBase = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
 $testRoot = [IO.Path]::GetFullPath((Join-Path $tempBase "codex-gemini-orchestrator-wrapper-test-$([guid]::NewGuid())"))
@@ -50,7 +50,10 @@ if "%~1"=="" goto done
 shift
 goto record
 :models
-echo Gemini 3.5 Flash (High)
+echo gemini-3.6-flash-high
+echo gemini-3.5-flash-high
+echo gemini-3.1-pro-high
+echo claude-opus-4-6-thinking
 exit /b 0
 :done
 exit /b 0
@@ -62,35 +65,47 @@ try {
     $env:PATH = "$fakeBin;$previousPath"
     $env:AGY_ARGUMENTS_FILE = $argumentsPath
 
-    $wrapperOutput = & pwsh -NoProfile -File $wrapperPath `
-        -WorkingDirectory $resolvedRepositoryRoot `
-        -Model gemini-3.5-flash `
-        -PromptFile $promptPath `
-        -AutoApprove 2>&1
-    $wrapperExitCode = $LASTEXITCODE
-
-    if ($wrapperExitCode -ne 0) {
-        throw "Wrapper exited with code $wrapperExitCode.`n$($wrapperOutput | Out-String)"
-    }
-    if (-not (Test-Path -LiteralPath $argumentsPath -PathType Leaf)) {
-        throw 'The fake agy command did not record an invocation.'
-    }
-
-    $actualArguments = @(Get-Content -LiteralPath $argumentsPath)
-    $expectedArguments = @(
-        '--dangerously-skip-permissions'
-        '--add-dir'
-        $resolvedRepositoryRoot
-        '--print-timeout'
-        '10m'
-        '--model'
-        'Gemini 3.5 Flash (High)'
-        '-p'
-        'wrapper regression smoke test'
+    $modelCases = @(
+        @{ Alias = 'gemini-3.6-flash'; Slug = 'gemini-3.6-flash-high' }
+        @{ Alias = 'gemini-3.5-flash'; Slug = 'gemini-3.5-flash-high' }
+        @{ Alias = 'gemini-3.1-pro'; Slug = 'gemini-3.1-pro-high' }
+        @{ Alias = 'claude-opus-4-6'; Slug = 'claude-opus-4-6-thinking' }
     )
 
-    Assert-SequenceEqual -Expected $expectedArguments -Actual $actualArguments
-    Write-Host 'PASS: wrapper binds agy to the resolved worktree and sets a 10-minute print timeout.'
+    foreach ($modelCase in $modelCases) {
+        Remove-Item -LiteralPath $argumentsPath -ErrorAction SilentlyContinue
+
+        $wrapperOutput = & pwsh -NoProfile -File $wrapperPath `
+            -WorkingDirectory $resolvedRepositoryRoot `
+            -Model $modelCase.Alias `
+            -PromptFile $promptPath `
+            -AutoApprove 2>&1
+        $wrapperExitCode = $LASTEXITCODE
+
+        if ($wrapperExitCode -ne 0) {
+            throw "Wrapper exited with code $wrapperExitCode for alias '$($modelCase.Alias)'.`n$($wrapperOutput | Out-String)"
+        }
+        if (-not (Test-Path -LiteralPath $argumentsPath -PathType Leaf)) {
+            throw "The fake agy command did not record an invocation for alias '$($modelCase.Alias)'."
+        }
+
+        $actualArguments = @(Get-Content -LiteralPath $argumentsPath)
+        $expectedArguments = @(
+            '--dangerously-skip-permissions'
+            '--add-dir'
+            $resolvedRepositoryRoot
+            '--print-timeout'
+            '10m'
+            '--model'
+            $modelCase.Slug
+            '-p'
+            'wrapper regression smoke test'
+        )
+
+        Assert-SequenceEqual -Expected $expectedArguments -Actual $actualArguments
+    }
+
+    Write-Host 'PASS: all worker aliases bind agy to the resolved worktree with a 10-minute print timeout.'
 }
 finally {
     $env:PATH = $previousPath

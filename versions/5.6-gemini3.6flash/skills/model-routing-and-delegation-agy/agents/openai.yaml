@@ -1,0 +1,4 @@
+interface:
+  display_name: "Model Routing and Delegation (AGY)"
+  short_description: "Route bounded work across Codex and AGY workers"
+  default_prompt: "Use $model-routing-and-delegation-agy to select and delegate this bounded task."

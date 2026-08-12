@@ -8,12 +8,17 @@ The version directory identifies the supported GPT generation, not the project r
 
 ### Added
 
-- Added the `5.6-gemini3.6flash` snapshot with Gemini 3.6 Flash and Gemini 3.1 Pro routing through the authenticated Antigravity CLI session.
+- Added the `model-routing-and-delegation-agy` skill and reduced `AGENTS.md` to the orchestrator boundary and skill trigger.
+- Added the native `gpt_5_6_luna_max` worker profile with max reasoning effort for complex bounded execution.
+- Expanded authenticated Antigravity routing to Gemini 3.6 Flash, Gemini 3.5 Flash, Gemini 3.1 Pro, and Claude Opus 4.6.
+- Updated `install.ps1` to default to `5.6-gemini3.6flash` and install bundled agents, scripts, and skills.
 - Documented how to detect and remove the PowerShell `Zone.Identifier` download-origin mark after downloading or copying the wrapper.
 
 ### Changed
 
 - Marked `5.6-gemini3.5flash` as an archived, deprecated snapshot retained for version history.
+- Clarified that GPT-5.6 Sol Max is an orchestrator comparison baseline and never a delegation target.
+- Added capability-specific routes for Luna Max, Gemini 3.5 Flash, Gemini 3.1 Pro, and Opus 4.6 while retaining Gemini 3.6 Flash as the default bounded worker.
 - Refined native Codex worker descriptions and instructions so Sol, Terra, and Luna advertise distinct risk- and task-based routing roles.
 - Updated routing to prefer Cost Efficiency among models that meet the task-specific capability threshold, with Intelligence as a secondary signal.
 - Replaced temporary-branch creation for Gemini write tasks with runtime-provided or detached isolated worktrees.

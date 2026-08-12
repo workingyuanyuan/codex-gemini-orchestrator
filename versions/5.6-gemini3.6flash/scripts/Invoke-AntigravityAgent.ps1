@@ -5,10 +5,20 @@ Runs one stateless Antigravity CLI task in an existing isolated Git worktree.
 
 .DESCRIPTION
 The orchestrating Codex agent owns worktree creation, integration, commits, and cleanup.
-This wrapper validates the worktree and UTF-8 task contract, resolves a stable Gemini
+This wrapper validates the worktree and UTF-8 task contract, resolves a stable worker
 alias against `agy models`, explicitly attaches the resolved worktree, then runs a
 single non-interactive Antigravity session with a ten-minute print timeout. It writes
 no log files and returns the Antigravity process exit code.
+
+Supported aliases resolve to Antigravity slugs as follows:
+
+  gemini-3.6-flash  ->  gemini-3.6-flash-high
+  gemini-3.5-flash  ->  gemini-3.5-flash-high
+  gemini-3.1-pro    ->  gemini-3.1-pro-high
+  claude-opus-4-6   ->  claude-opus-4-6-thinking
+
+The Gemini slugs include reasoning effort. Opus 4.6 is published only in thinking
+mode. Do not pass `--effort` separately.
 
 .EXAMPLE
 & "$HOME\.codex\scripts\Invoke-AntigravityAgent.ps1" `
@@ -25,7 +35,7 @@ param(
     [string]$WorkingDirectory,
 
     [Parameter(Mandatory)]
-    [ValidateSet('gemini-3.6-flash', 'gemini-3.1-pro')]
+    [ValidateSet('gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.1-pro', 'claude-opus-4-6')]
     [string]$Model,
 
     [Parameter(Mandatory)]
@@ -106,7 +116,9 @@ if ($modelsExitCode -ne 0) {
 $cleanModelsOutput = Remove-AnsiEscapeSequences -Text $modelsOutput
 $modelSlug = switch ($Model) {
     'gemini-3.6-flash' { 'gemini-3.6-flash-high' }
+    'gemini-3.5-flash' { 'gemini-3.5-flash-high' }
     'gemini-3.1-pro'   { 'gemini-3.1-pro-high' }
+    'claude-opus-4-6'  { 'claude-opus-4-6-thinking' }
     default { throw "Unsupported model alias: $Model" }
 }
 
