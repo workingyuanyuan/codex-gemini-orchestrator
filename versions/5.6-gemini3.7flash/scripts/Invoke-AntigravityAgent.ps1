@@ -14,18 +14,16 @@ It writes no log files.
 
 Supported aliases resolve to Antigravity slugs as follows:
 
-  gemini-3.6-flash  ->  gemini-3.6-flash-high
-  gemini-3.5-flash  ->  gemini-3.5-flash-high
-  gemini-3.1-pro    ->  gemini-3.1-pro-high
-  claude-opus-4-6   ->  claude-opus-4-6-thinking
+  gemini-3.7-flash       ->  gemini-3.7-flash-medium
+  gemini-3.7-flash-high  ->  gemini-3.7-flash-high
+  gemini-3.1-pro         ->  gemini-3.1-pro-high
 
-The Gemini slugs include reasoning effort. Opus 4.6 is published only in thinking
-mode. Do not pass `--effort` separately.
+The Gemini slugs include reasoning effort. Do not pass `--effort` separately.
 
 .EXAMPLE
 & "$HOME\.codex\scripts\Invoke-AntigravityAgent.ps1" `
   -WorkingDirectory "C:\src\project-agent-task" `
-  -Model gemini-3.6-flash `
+  -Model gemini-3.7-flash `
   -PromptFile "C:\src\contracts\task.md" `
   -AutoApprove
 #>
@@ -37,7 +35,7 @@ param(
     [string]$WorkingDirectory,
 
     [Parameter(Mandatory)]
-    [ValidateSet('gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.1-pro', 'claude-opus-4-6')]
+    [ValidateSet('gemini-3.7-flash', 'gemini-3.7-flash-high', 'gemini-3.1-pro')]
     [string]$Model,
 
     [Parameter(Mandatory)]
@@ -131,10 +129,9 @@ if ($modelsExitCode -ne 0) {
 
 $cleanModelsOutput = Remove-AnsiEscapeSequences -Text $modelsOutput
 $modelSlug = switch ($Model) {
-    'gemini-3.6-flash' { 'gemini-3.6-flash-high' }
-    'gemini-3.5-flash' { 'gemini-3.5-flash-high' }
-    'gemini-3.1-pro'   { 'gemini-3.1-pro-high' }
-    'claude-opus-4-6'  { 'claude-opus-4-6-thinking' }
+    'gemini-3.7-flash'      { 'gemini-3.7-flash-medium' }
+    'gemini-3.7-flash-high' { 'gemini-3.7-flash-high' }
+    'gemini-3.1-pro'        { 'gemini-3.1-pro-high' }
     default { throw "Unsupported model alias: $Model" }
 }
 

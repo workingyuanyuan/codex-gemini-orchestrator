@@ -1,6 +1,6 @@
 ---
 name: model-routing-and-delegation-agy
-description: Route bounded execution work from a Codex orchestrator to native GPT-5.6 Luna Max or authenticated Antigravity CLI workers (Gemini 3.6 Flash, Gemini 3.5 Flash, Gemini 3.1 Pro, and Claude Opus 4.6). Use when work is separable, bounded, objectively verifiable, parallelizable, context-heavy, or explicitly requested for a worker, subagent, Gemini, Opus, Luna, or Antigravity. Covers model selection, task contracts, Git worktree isolation, invocation, validation, and capability-directed escalation.
+description: Route bounded execution work from a Codex orchestrator to native GPT-5.6 Luna Max or authenticated Gemini 3.7 Flash and Gemini 3.1 Pro workers through Antigravity CLI. Use when work is separable, bounded, objectively verifiable, parallelizable, context-heavy, or explicitly requested for a worker, subagent, Gemini, Luna, or Antigravity. Covers model and Gemini 3.7 reasoning-tier selection, task contracts, Git worktree isolation, invocation, validation, and capability-directed escalation.
 ---
 
 # Model Routing and Delegation
@@ -23,18 +23,17 @@ Scores are routing estimates on a 0–100 scale; higher is better. Cost Efficien
 | ---------------- | ------------------- | --------- | ------------ | --------- | ------ | ------- | ---- | ---- | -------- | ----------- |
 | GPT-5.6 Sol Max  | Orchestrator (self) | 50        | 81           | 91        | 83     | 62      | 96   | 79   | 87       | 71          |
 | GPT-5.6 Luna Max | Worker              | 83        | 73           | 85        | 83     | 57      | 87   | 78   | 72       | 60          |
-| Opus 4.6         | Worker              | 60        | 74           | 88        | 78     | 43      | 89   | 70   | 83       | 63          |
 | Gemini 3.1 Pro   | Worker              | 86        | 77           | 84        | 76     | 28      | 91   | 78   | 85       | 79          |
-| Gemini 3.5 Flash | Worker              | 87        | 75           | 82        | 78     | 43      | 88   | 65   | 85       | 75          |
-| Gemini 3.6 Flash | Worker — default    | 88        | 74           | 85        | 78     | 46      | 86   | 63   | 84       | 75          |
+| Gemini 3.7 Flash | Worker — default    | 92        | 78           | 87        | 79     | 61      | 93   | 68   | 85       | 80          |
+
+The Gemini 3.7 Flash row records High reasoning. Medium has the same Coding and Agentic capability scores as High; do not infer unlisted Medium scores for the other dimensions.
 
 ## Default routes
 
-- **Gemini 3.6 Flash:** default for bounded, objectively verifiable execution.
+- **Gemini 3.7 Flash Medium:** default for bounded, objectively verifiable execution. Use it for coding and agentic work because High does not improve those two capabilities.
+- **Gemini 3.7 Flash High:** upgrade from Medium only when the acceptance bar specifically requires stronger Reasoning, Math, Data, Language, or Instruction capability. Do not upgrade for Coding or Agentic requirements alone.
 - **GPT-5.6 Luna Max:** complex bounded execution requiring exploration, cross-file edits, or iterative build-test-fix loops.
-- **Gemini 3.5 Flash:** well-bounded, objectively verifiable TypeScript and Python work; prefer Gemini 3.6 Flash or Luna Max for DeepSWE-shaped work.
-- **Gemini 3.1 Pro:** dense specifications, strict instruction following, language precision, difficult math, and data work.
-- **Opus 4.6:** intricate debugging, subtle invariants, complex causal analysis, and large cross-file comprehension.
+- **Gemini 3.1 Pro:** data-heavy work where its higher Data score materially matters.
 
 ## Worker entry points
 
@@ -42,17 +41,16 @@ Use the native Codex agent `gpt_5_6_luna_max` for GPT-5.6 Luna Max. Its TOML pro
 
 Use the official Antigravity CLI through the authenticated subscription session for external workers; never request or use an API key.
 
-- `gemini-3.6-flash` → `gemini-3.6-flash-high`
-- `gemini-3.5-flash` → `gemini-3.5-flash-high`
+- `gemini-3.7-flash` → `gemini-3.7-flash-medium`
+- `gemini-3.7-flash-high` → `gemini-3.7-flash-high`
 - `gemini-3.1-pro` → `gemini-3.1-pro-high`
-- `claude-opus-4-6` → `claude-opus-4-6-thinking`
 
-The Gemini slugs include effort; Opus 4.6 is available only in thinking mode. Do not pass a separate effort option. Never substitute another model when an alias is missing or ambiguous.
+The Gemini slugs include effort. Do not pass a separate effort option. Never substitute another model when an alias is missing or ambiguous.
 
 Before invoking Antigravity, emit exactly one progress line: `Delegating to <model alias>: <brief task>`.
 
 ```powershell
-& "$HOME\.codex\scripts\Invoke-AntigravityAgent.ps1" -WorkingDirectory $worktree -Model gemini-3.6-flash -PromptFile $contract -AutoApprove
+& "$HOME\.codex\scripts\Invoke-AntigravityAgent.ps1" -WorkingDirectory $worktree -Model gemini-3.7-flash -PromptFile $contract -AutoApprove
 ```
 
 Antigravity print mode is headless: repository inspection through the command tool cannot pause for permission approval. Therefore use `-AutoApprove` for Antigravity only inside a dedicated isolated worktree, including read-only reviews. The task contract remains authoritative: explicitly forbid writes for read-only work and verify that the worktree has no diff afterward. Never use `-AutoApprove` against the user's primary checkout or a shared dirty worktree. Give the wrapper an outer timeout longer than its ten-minute internal print timeout.

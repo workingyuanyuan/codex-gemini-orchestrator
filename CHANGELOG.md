@@ -6,6 +6,28 @@ The version directory identifies the supported GPT generation, not the project r
 
 ## [Unreleased]
 
+### Fixed
+
+- Scoped Git `safe.directory` trust to the wrapper process and its Antigravity child so runtime-owned worktrees pass both preflight and delegated Git commands without changing global configuration.
+- Treat empty output and known headless permission-denial output as delegation failure even when Antigravity exits with code zero.
+- Added wrapper regressions for dubious ownership, false-success output, and native exit-code propagation.
+
+## [5.6-gemini3.7flash] - 2026-08-14
+
+### Added
+
+- Added the `5.6-gemini3.7flash` snapshot with authenticated Medium and High Gemini 3.7 Flash routes.
+
+### Changed
+
+- Updated the routing capability table to the supplied scores and made Gemini 3.7 Flash the default bounded worker.
+- Made Gemini 3.7 Flash Medium the default, with High reserved for Reasoning, Math, Data, Language, or Instruction requirements because Coding and Agentic do not improve at High.
+- Removed Opus 4.6 completely from the current snapshot; retained Gemini 3.1 Pro for data-heavy work and removed Gemini 3.5/3.6 Flash aliases.
+- Updated `install.ps1`, README examples, and regression tests to target `5.6-gemini3.7flash` by default.
+- Marked `5.6-gemini3.6flash` as an archived, deprecated snapshot retained for version history.
+
+## [5.6-gemini3.6flash] - 2026-08-12
+
 ### Added
 
 - Added the `model-routing-and-delegation-agy` skill and reduced `AGENTS.md` to the orchestrator boundary and skill trigger.
@@ -19,10 +41,10 @@ The version directory identifies the supported GPT generation, not the project r
 - Marked `5.6-gemini3.5flash` as an archived, deprecated snapshot retained for version history.
 - Clarified that GPT-5.6 Sol Max is an orchestrator comparison baseline and never a delegation target.
 - Added capability-specific routes for Luna Max, Gemini 3.5 Flash, Gemini 3.1 Pro, and Opus 4.6 while retaining Gemini 3.6 Flash as the default bounded worker.
-- Refined native Codex worker descriptions and instructions so Sol, Terra, and Luna advertise distinct risk- and task-based routing roles.
 - Updated routing to prefer Cost Efficiency among models that meet the task-specific capability threshold, with Intelligence as a secondary signal.
 - Replaced temporary-branch creation for Gemini write tasks with runtime-provided or detached isolated worktrees.
 - Required temporary delegation contracts to remain outside the repository unless they are intended deliverables.
+- Required isolated worktrees and headless command approval for read-only as well as write-capable Antigravity tasks, with a zero-diff check for read-only reviews.
 
 ## [5.6] - 2026-07-15
 

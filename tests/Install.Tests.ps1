@@ -39,7 +39,7 @@ try {
 
     $collisionDetected = $false
     try {
-        & $installerPath -Version '5.6-gemini3.6flash'
+        & $installerPath -Version '5.6-gemini3.7flash'
     }
     catch {
         $collisionDetected = $_.Exception.Message -like 'Installation would overwrite existing files*'
@@ -48,7 +48,7 @@ try {
         throw 'Installer did not reject existing destination files without -Force.'
     }
 
-    & $installerPath -Version '5.6-gemini3.6flash' -Force
+    & $installerPath -Version '5.6-gemini3.7flash' -Force
     Write-Host 'PASS: installer copies agents, scripts, and skills; rejects collisions; and supports -Force.'
 }
 finally {
