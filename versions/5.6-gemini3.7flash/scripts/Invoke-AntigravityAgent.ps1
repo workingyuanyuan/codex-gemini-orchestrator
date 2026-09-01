@@ -16,7 +16,6 @@ Supported aliases resolve to Antigravity slugs as follows:
 
   gemini-3.7-flash       ->  gemini-3.7-flash-medium
   gemini-3.7-flash-high  ->  gemini-3.7-flash-high
-  gemini-3.1-pro         ->  gemini-3.1-pro-high
 
 The Gemini slugs include reasoning effort. Do not pass `--effort` separately.
 
@@ -35,7 +34,7 @@ param(
     [string]$WorkingDirectory,
 
     [Parameter(Mandatory)]
-    [ValidateSet('gemini-3.7-flash', 'gemini-3.7-flash-high', 'gemini-3.1-pro')]
+    [ValidateSet('gemini-3.7-flash', 'gemini-3.7-flash-high')]
     [string]$Model,
 
     [Parameter(Mandatory)]
@@ -131,7 +130,6 @@ $cleanModelsOutput = Remove-AnsiEscapeSequences -Text $modelsOutput
 $modelSlug = switch ($Model) {
     'gemini-3.7-flash'      { 'gemini-3.7-flash-medium' }
     'gemini-3.7-flash-high' { 'gemini-3.7-flash-high' }
-    'gemini-3.1-pro'        { 'gemini-3.1-pro-high' }
     default { throw "Unsupported model alias: $Model" }
 }
 

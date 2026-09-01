@@ -25,6 +25,7 @@ try {
     $expectedFiles = @(
         '.codex\AGENTS.md'
         '.codex\agents\gpt-5-6-luna-max.toml'
+        '.codex\agents\gpt-5-6-terra-max.toml'
         '.codex\scripts\Invoke-AntigravityAgent.ps1'
         '.codex\skills\model-routing-and-delegation-agy\SKILL.md'
         '.codex\skills\model-routing-and-delegation-agy\agents\openai.yaml'

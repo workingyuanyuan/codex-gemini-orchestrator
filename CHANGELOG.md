@@ -6,6 +6,16 @@ The version directory identifies the supported GPT generation, not the project r
 
 ## [Unreleased]
 
+### Added
+
+- Added a native `gpt_5_6_terra_max` worker profile to the current `5.6-gemini3.7flash` snapshot.
+
+### Changed
+
+- Replaced the routing table with the new Cost Efficiency, Reasoning, Knowledge, Coding, Agentic, and Language dimensions and scores.
+- Retained Gemini 3.7 Flash Medium as the default bounded worker and kept High as an explicit reasoning-tier upgrade.
+- Removed Gemini 3.1 Pro from the current routing policy and Antigravity wrapper.
+
 ### Fixed
 
 - Scoped Git `safe.directory` trust to the wrapper process and its Antigravity child so runtime-owned worktrees pass both preflight and delegated Git commands without changing global configuration.

@@ -52,7 +52,6 @@ goto record
 :models
 echo gemini-3.7-flash-high
 echo gemini-3.7-flash-medium
-echo gemini-3.1-pro-high
 exit /b 0
 :done
 if "%AGY_TEST_MODE%"=="empty" exit /b 0
@@ -82,7 +81,6 @@ try {
     $modelCases = @(
         @{ Alias = 'gemini-3.7-flash'; Slug = 'gemini-3.7-flash-medium' }
         @{ Alias = 'gemini-3.7-flash-high'; Slug = 'gemini-3.7-flash-high' }
-        @{ Alias = 'gemini-3.1-pro'; Slug = 'gemini-3.1-pro-high' }
     )
 
     foreach ($modelCase in $modelCases) {
@@ -118,7 +116,7 @@ try {
         Assert-SequenceEqual -Expected $expectedArguments -Actual $actualArguments
     }
 
-    foreach ($retiredAlias in @('gemini-3.6-flash', 'gemini-3.5-flash', 'claude-opus-4-6')) {
+    foreach ($retiredAlias in @('gemini-3.1-pro', 'gemini-3.6-flash', 'gemini-3.5-flash', 'claude-opus-4-6')) {
         $wrapperOutput = & pwsh -NoProfile -File $wrapperPath `
             -WorkingDirectory $resolvedRepositoryRoot `
             -Model $retiredAlias `

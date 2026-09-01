@@ -1,6 +1,6 @@
 ---
 name: model-routing-and-delegation-agy
-description: Route bounded execution work from a Codex orchestrator to native GPT-5.6 Luna Max or authenticated Gemini 3.7 Flash and Gemini 3.1 Pro workers through Antigravity CLI. Use when work is separable, bounded, objectively verifiable, parallelizable, context-heavy, or explicitly requested for a worker, subagent, Gemini, Luna, or Antigravity. Covers model and Gemini 3.7 reasoning-tier selection, task contracts, Git worktree isolation, invocation, validation, and capability-directed escalation.
+description: Route bounded execution work from a Codex orchestrator to native GPT-5.6 Terra Max or GPT-5.6 Luna Max workers, or authenticated Gemini 3.7 Flash Medium and High through Antigravity CLI. Use when work is separable, bounded, objectively verifiable, parallelizable, context-heavy, or explicitly requested for a worker, subagent, Gemini, Terra, Luna, or Antigravity. Covers model selection, task contracts, Git worktree isolation, invocation, validation, and capability-directed escalation.
 ---
 
 # Model Routing and Delegation
@@ -12,40 +12,41 @@ Keep architecture, decomposition, shared contracts, integration, review, and fin
 ## Routing policy
 
 1. Identify the capabilities, risk, and acceptance bar that determine success.
-2. Exclude models that do not meet the bar; among qualified workers, prefer higher Cost Efficiency. Use Intelligence only when task-specific fit is unclear.
+2. Exclude models that do not meet the bar; among qualified workers, prefer higher Cost Efficiency. When task-specific fit is unclear, compare the capabilities most relevant to the acceptance criteria.
 3. Keep trivial, tightly coupled, open-ended, or evolving-judgment work in the orchestrator.
 4. On failure, fix contract, context, or environment defects and retry once. For a confirmed capability failure, choose a worker stronger in that capability. Return work that is no longer bounded to the orchestrator.
 5. Use a second-model review only when risk or unresolved uncertainty warrants it. Stop when acceptance criteria are met.
 
-Scores are routing estimates on a 0–100 scale; higher is better. Cost Efficiency reflects subscription-adjusted cost. GPT-5.6 Sol Max is the usual orchestrator and a comparison baseline, never a delegation target. Max scores do not prescribe a general reasoning-effort policy.
+Scores are routing estimates on a 0–100 scale; higher is better. GPT-5.6 Sol Max is the usual orchestrator and a comparison baseline, never a delegation target. Max scores do not prescribe a general reasoning-effort policy.
 
-| Model            | Role                | Cost Eff. | Intelligence | Reasoning | Coding | Agentic | Math | Data | Language | Instruction |
-| ---------------- | ------------------- | --------- | ------------ | --------- | ------ | ------- | ---- | ---- | -------- | ----------- |
-| GPT-5.6 Sol Max  | Orchestrator (self) | 50        | 81           | 91        | 83     | 62      | 96   | 79   | 87       | 71          |
-| GPT-5.6 Luna Max | Worker              | 83        | 73           | 85        | 83     | 57      | 87   | 78   | 72       | 60          |
-| Gemini 3.1 Pro   | Worker              | 86        | 77           | 84        | 76     | 28      | 91   | 78   | 85       | 79          |
-| Gemini 3.7 Flash | Worker — default    | 92        | 78           | 87        | 79     | 61      | 93   | 68   | 85       | 80          |
+| Model | Role | Cost Eff.† | Reasoning | Knowledge | Coding | Agentic | Language |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| GPT-5.6 Sol · max | Orchestrator (self) | 17 | 81.0 | 64.7 | 64.0 | 44.2 | 81.6 |
+| GPT-5.6 Terra · max | Worker | 33 | 78.5 | 44.3 | 57.6 | 42.1 | 73.8 |
+| GPT-5.6 Luna · max | Worker | 83 | 70.5 | 54.8 | 56.6 | 39.8 | 72.4 |
+| Gemini 3.7 Flash · high | Worker | 100 | 74.4 | 65.4 | 57.4 | 43.4 | 83.1 |
 
-The Gemini 3.7 Flash row records High reasoning. Medium has the same Coding and Agentic capability scores as High; do not infer unlisted Medium scores for the other dimensions.
+† Cost Efficiency reflects subscription-adjusted cost.
+
+The Gemini 3.7 Flash row records High reasoning. Medium remains the default worker and has the same Coding and Agentic capability scores as High; do not infer unlisted Medium scores for the other dimensions.
 
 ## Default routes
 
 - **Gemini 3.7 Flash Medium:** default for bounded, objectively verifiable execution. Use it for coding and agentic work because High does not improve those two capabilities.
-- **Gemini 3.7 Flash High:** upgrade from Medium only when the acceptance bar specifically requires stronger Reasoning, Math, Data, Language, or Instruction capability. Do not upgrade for Coding or Agentic requirements alone.
-- **GPT-5.6 Luna Max:** complex bounded execution requiring exploration, cross-file edits, or iterative build-test-fix loops.
-- **Gemini 3.1 Pro:** data-heavy work where its higher Data score materially matters.
+- **Gemini 3.7 Flash High:** upgrade from Medium only when the acceptance bar specifically requires the High reasoning tier. Do not upgrade for Coding or Agentic requirements alone.
+- **GPT-5.6 Terra Max:** reasoning-intensive or demanding coding work whose acceptance bar benefits from the strongest worker Reasoning or Coding score.
+- **GPT-5.6 Luna Max:** native Codex execution requiring exploration, cross-file edits, or iterative build-test-fix loops when its environment or tool integration materially benefits the task.
 
 ## Worker entry points
 
-Use the native Codex agent `gpt_5_6_luna_max` for GPT-5.6 Luna Max. Its TOML profile fixes reasoning effort at `max`.
+Use the native Codex agent `gpt_5_6_terra_max` for GPT-5.6 Terra Max and `gpt_5_6_luna_max` for GPT-5.6 Luna Max. Their TOML profiles fix reasoning effort at `max`.
 
 Use the official Antigravity CLI through the authenticated subscription session for external workers; never request or use an API key.
 
 - `gemini-3.7-flash` → `gemini-3.7-flash-medium`
 - `gemini-3.7-flash-high` → `gemini-3.7-flash-high`
-- `gemini-3.1-pro` → `gemini-3.1-pro-high`
 
-The Gemini slugs include effort. Do not pass a separate effort option. Never substitute another model when an alias is missing or ambiguous.
+The Gemini slug includes effort. Do not pass a separate effort option. Never substitute another model when an alias is missing or ambiguous.
 
 Before invoking Antigravity, emit exactly one progress line: `Delegating to <model alias>: <brief task>`.
 

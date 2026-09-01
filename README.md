@@ -6,7 +6,7 @@ Codex 負責架構、拆解、整合、審查與最終驗收；子代理只執�
 
 ## 版本
 
-- `versions/5.6-gemini3.7flash/`：目前版本，包含按需載入的路由 skill、原生 GPT-5.6 Luna Max agent 與 Antigravity workers。
+- `versions/5.6-gemini3.7flash/`：目前版本，包含按需載入的路由 skill、原生 GPT-5.6 Terra Max 與 Luna Max agents，以及 Antigravity worker。
 - `versions/5.6-gemini3.6flash/`：已廢棄，僅保留作為版本紀錄。
 - `versions/5.6-gemini3.5flash/`：已廢棄，僅保留作為版本紀錄。
 - `versions/5.6/`：早期 GPT-5.6 多模型路由基準。
@@ -17,7 +17,8 @@ Codex 負責架構、拆解、整合、審查與最終驗收；子代理只執�
 versions/5.6-gemini3.7flash/
 ├─ AGENTS.md
 ├─ agents/
-│  └─ gpt-5-6-luna-max.toml
+│  ├─ gpt-5-6-luna-max.toml
+│  └─ gpt-5-6-terra-max.toml
 ├─ scripts/
 │  └─ Invoke-AntigravityAgent.ps1
 └─ skills/
@@ -58,9 +59,9 @@ versions/5.6-gemini3.7flash/
 `model-routing-and-delegation-agy` skill 使用以下入口：
 
 - `gpt_5_6_luna_max`：原生 GPT-5.6 Luna Max agent，用於需要探索、跨檔修改或反覆 build-test-fix 的複雜 bounded execution。
+- `gpt_5_6_terra_max`：原生 GPT-5.6 Terra Max agent，用於驗收門檻需要最強 worker Reasoning 或 Coding 分數的 bounded work。
 - `gemini-3.7-flash` → `gemini-3.7-flash-medium`：大多數 bounded work 的預設入口；High 不會提升 Coding 或 Agentic，因此這兩類需求維持 Medium。
-- `gemini-3.7-flash-high` → `gemini-3.7-flash-high`：只有驗收門檻明確要求更強的 Reasoning、Math、Data、Language 或 Instruction 時才升級。
-- `gemini-3.1-pro` → `gemini-3.1-pro-high`：資料密集、且較高 Data 能力分數確實重要的工作。
+- `gemini-3.7-flash-high` → `gemini-3.7-flash-high`：驗收門檻明確需要 High reasoning tier 時使用。
 
 GPT-5.6 Sol Max 只作為主代理與能力比較基準，不是可委派的 worker。封裝腳本會用 `agy models` 驗證外部 alias，並透過已登入的 Antigravity 訂閱工作階段執行單次、無狀態任務。
 
