@@ -9,23 +9,23 @@ including AGENTS.md, native agent profiles, scripts, and bundled skills. Existin
 destination files are never overwritten unless -Force is specified.
 
 .PARAMETER Version
-Version directory to install from versions/. Defaults to 5.6-gemini3.7flash.
+Version directory to install from versions/. Defaults to 5.6-gemini3.8flash.
 
 .PARAMETER Force
 Allows existing destination files to be overwritten. Unrelated files are untouched.
 
 .EXAMPLE
-./install.ps1 -Version 5.6-gemini3.7flash
+./install.ps1 -Version 5.6-gemini3.8flash
 
 .EXAMPLE
-./install.ps1 -Version 5.6-gemini3.7flash -Force
+./install.ps1 -Version 5.6-gemini3.8flash -Force
 #>
 
 [CmdletBinding()]
 param(
     [Parameter()]
     [ValidatePattern('^[A-Za-z0-9][A-Za-z0-9.\-]*$')]
-    [string]$Version = '5.6-gemini3.7flash',
+    [string]$Version = '5.6-gemini3.8flash',
 
     [switch]$Force
 )

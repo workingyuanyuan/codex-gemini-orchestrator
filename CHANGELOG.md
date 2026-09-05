@@ -8,9 +8,14 @@ The version directory identifies the supported GPT generation, not the project r
 
 ### Added
 
-- Added a native `gpt_5_6_terra_max` worker profile to the current `5.6-gemini3.7flash` snapshot.
+- Added the `5.6-gemini3.8flash` snapshot with Gemini 3.8 Flash Medium and High worker routes.
+
+- Added a native `gpt_5_6_terra_max` worker profile to the `5.6-gemini3.7flash` snapshot.
 
 ### Changed
+
+- Set the installer, README examples, and regression tests to `5.6-gemini3.8flash`; retained 3.7 as an archived snapshot.
+- Kept Medium as the default and High as an explicit upgrade; carried forward Gemini scores as provisional references pending 3.8 measurements.
 
 - Replaced the routing table with the new Cost Efficiency, Reasoning, Knowledge, Coding, Agentic, and Language dimensions and scores.
 - Retained Gemini 3.7 Flash Medium as the default bounded worker and kept High as an explicit reasoning-tier upgrade.

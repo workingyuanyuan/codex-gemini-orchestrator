@@ -24,7 +24,7 @@ function Assert-SequenceEqual {
 }
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
-$wrapperPath = Join-Path $repositoryRoot 'versions\5.6-gemini3.7flash\scripts\Invoke-AntigravityAgent.ps1'
+$wrapperPath = Join-Path $repositoryRoot 'versions\5.6-gemini3.8flash\scripts\Invoke-AntigravityAgent.ps1'
 $resolvedRepositoryRoot = (Resolve-Path -LiteralPath $repositoryRoot).Path
 $tempBase = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
 $testRoot = [IO.Path]::GetFullPath((Join-Path $tempBase "codex-gemini-orchestrator-wrapper-test-$([guid]::NewGuid())"))
@@ -50,8 +50,13 @@ if "%~1"=="" goto done
 shift
 goto record
 :models
-echo gemini-3.7-flash-high
-echo gemini-3.7-flash-medium
+if "%AGY_TEST_MODE%"=="legacy-models" (
+  echo gemini-3.7-flash-high
+  echo gemini-3.7-flash-medium
+  exit /b 0
+)
+echo gemini-3.8-flash-high
+echo gemini-3.8-flash-medium
 exit /b 0
 :done
 if "%AGY_TEST_MODE%"=="empty" exit /b 0
@@ -79,8 +84,8 @@ try {
     $globalSafeDirectoriesBefore = @(& git config --global --get-all safe.directory 2>$null)
 
     $modelCases = @(
-        @{ Alias = 'gemini-3.7-flash'; Slug = 'gemini-3.7-flash-medium' }
-        @{ Alias = 'gemini-3.7-flash-high'; Slug = 'gemini-3.7-flash-high' }
+        @{ Alias = 'gemini-3.8-flash'; Slug = 'gemini-3.8-flash-medium' }
+        @{ Alias = 'gemini-3.8-flash-high'; Slug = 'gemini-3.8-flash-high' }
     )
 
     foreach ($modelCase in $modelCases) {
@@ -116,7 +121,7 @@ try {
         Assert-SequenceEqual -Expected $expectedArguments -Actual $actualArguments
     }
 
-    foreach ($retiredAlias in @('gemini-3.1-pro', 'gemini-3.6-flash', 'gemini-3.5-flash', 'claude-opus-4-6')) {
+    foreach ($retiredAlias in @('gemini-3.7-flash', 'gemini-3.7-flash-high', 'gemini-3.1-pro', 'gemini-3.6-flash', 'gemini-3.5-flash', 'claude-opus-4-6')) {
         $wrapperOutput = & pwsh -NoProfile -File $wrapperPath `
             -WorkingDirectory $resolvedRepositoryRoot `
             -Model $retiredAlias `
@@ -125,6 +130,22 @@ try {
 
         if ($LASTEXITCODE -eq 0) {
             throw "Retired alias '$retiredAlias' was unexpectedly accepted.`n$($wrapperOutput | Out-String)"
+        }
+    }
+
+    $env:AGY_TEST_MODE = 'legacy-models'
+    foreach ($modelCase in $modelCases) {
+        Remove-Item -LiteralPath $argumentsPath -ErrorAction SilentlyContinue
+        $wrapperOutput = & pwsh -NoProfile -File $wrapperPath `
+            -WorkingDirectory $resolvedRepositoryRoot `
+            -Model $modelCase.Alias `
+            -PromptFile $promptPath `
+            -AutoApprove 2>&1
+        if ($LASTEXITCODE -eq 0 -or ($wrapperOutput | Out-String) -notlike '*did not resolve uniquely*') {
+            throw "Wrapper must fail when the requested 3.8 slug is absent."
+        }
+        if (Test-Path -LiteralPath $argumentsPath) {
+            throw 'Wrapper invoked a worker despite the requested 3.8 slug being absent.'
         }
     }
 
@@ -144,7 +165,7 @@ try {
         $env:AGY_TEST_MODE = $runtimeCase.Mode
         $wrapperOutput = & pwsh -NoProfile -File $wrapperPath `
             -WorkingDirectory $resolvedRepositoryRoot `
-            -Model 'gemini-3.7-flash' `
+            -Model 'gemini-3.8-flash' `
             -PromptFile $promptPath `
             -AutoApprove 2>&1
         $wrapperExitCode = $LASTEXITCODE

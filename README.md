@@ -1,12 +1,15 @@
 # codex-gemini-orchestrator
 
+> **早期實驗版本**：目前的 Gemini 3.8 Flash 整合用於初步試驗。路由分數暫沿用 3.7 作為參考，3.8 的實機 CLI 可用性、能力分數與 Medium／High 差異尚待驗證。
+
 這個專案解決的主要痛點是：**讓精簡的 `AGENTS.md` 按需載入模型路由 skill，再把任務委派給合適的子代理；其中包含原生 Codex agent 與透過官方 Antigravity CLI 使用外部模型，並沿用既有訂閱登入狀態，不需要 API Key 計費方案。**
 
 Codex 負責架構、拆解、整合、審查與最終驗收；子代理只執行範圍明確、可客觀驗證的單次任務。
 
 ## 版本
 
-- `versions/5.6-gemini3.7flash/`：目前版本，包含按需載入的路由 skill、原生 GPT-5.6 Terra Max 與 Luna Max agents，以及 Antigravity worker。
+- `versions/5.6-gemini3.8flash/`：目前的早期實驗版本，包含按需載入的路由 skill、原生 GPT-5.6 Terra Max 與 Luna Max agents，以及 Antigravity worker。
+- `versions/5.6-gemini3.7flash/`：已封存，保留作為版本紀錄。
 - `versions/5.6-gemini3.6flash/`：已廢棄，僅保留作為版本紀錄。
 - `versions/5.6-gemini3.5flash/`：已廢棄，僅保留作為版本紀錄。
 - `versions/5.6/`：早期 GPT-5.6 多模型路由基準。
@@ -14,7 +17,7 @@ Codex 負責架構、拆解、整合、審查與最終驗收；子代理只執�
 目前版本包含：
 
 ```text
-versions/5.6-gemini3.7flash/
+versions/5.6-gemini3.8flash/
 ├─ AGENTS.md
 ├─ agents/
 │  ├─ gpt-5-6-luna-max.toml
@@ -43,13 +46,13 @@ versions/5.6-gemini3.7flash/
 從專案根目錄執行：
 
 ```powershell
-./install.ps1 -Version 5.6-gemini3.7flash
+./install.ps1 -Version 5.6-gemini3.8flash
 ```
 
 安裝器會把 `AGENTS.md`、`agents/`、`scripts/` 與 `skills/` 複製到 `$HOME\.codex`。若已有同名檔案，安裝會列出衝突並中止；確認備份後可使用 `-Force` 只覆寫列出的檔案：
 
 ```powershell
-./install.ps1 -Version 5.6-gemini3.7flash -Force
+./install.ps1 -Version 5.6-gemini3.8flash -Force
 ```
 
 更新既有安裝也使用上述 `-Force` 指令。它會覆寫同名的本機客製檔案，因此請先備份；更新 skill 後請開啟新的 Codex task，讓新指令被重新載入。
@@ -60,8 +63,10 @@ versions/5.6-gemini3.7flash/
 
 - `gpt_5_6_luna_max`：原生 GPT-5.6 Luna Max agent，用於需要探索、跨檔修改或反覆 build-test-fix 的複雜 bounded execution。
 - `gpt_5_6_terra_max`：原生 GPT-5.6 Terra Max agent，用於驗收門檻需要最強 worker Reasoning 或 Coding 分數的 bounded work。
-- `gemini-3.7-flash` → `gemini-3.7-flash-medium`：大多數 bounded work 的預設入口；High 不會提升 Coding 或 Agentic，因此這兩類需求維持 Medium。
-- `gemini-3.7-flash-high` → `gemini-3.7-flash-high`：驗收門檻明確需要 High reasoning tier 時使用。
+- `gemini-3.8-flash` → `gemini-3.8-flash-medium`：大多數 bounded work 的預設入口；Coding 與 Agentic 工作沿用 Medium 路由政策。
+- `gemini-3.8-flash-high` → `gemini-3.8-flash-high`：驗收門檻明確需要 High reasoning tier 時使用。
+
+Gemini 3.8 Flash 的表列分數暫沿用 3.7 High 作為路由參考；3.8 的實測分數與 Medium／High 能力差異尚待驗證。執行時需要 `agy models` 列出所選的 `gemini-3.8-flash-medium` 或 `gemini-3.8-flash-high` slug。
 
 GPT-5.6 Sol Max 只作為主代理與能力比較基準，不是可委派的 worker。封裝腳本會用 `agy models` 驗證外部 alias，並透過已登入的 Antigravity 訂閱工作階段執行單次、無狀態任務。
 

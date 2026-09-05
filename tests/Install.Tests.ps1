@@ -36,11 +36,15 @@ try {
         if (-not (Test-Path -LiteralPath $installedPath -PathType Leaf)) {
             throw "Expected installed file is missing: $installedPath"
         }
+        $sourcePath = Join-Path $repositoryRoot ('versions\5.6-gemini3.8flash\' + $relativePath.Substring('.codex\'.Length))
+        if ((Get-FileHash -LiteralPath $sourcePath).Hash -cne (Get-FileHash -LiteralPath $installedPath).Hash) {
+            throw "Installed file does not match the current snapshot: $relativePath"
+        }
     }
 
     $collisionDetected = $false
     try {
-        & $installerPath -Version '5.6-gemini3.7flash'
+        & $installerPath -Version '5.6-gemini3.8flash'
     }
     catch {
         $collisionDetected = $_.Exception.Message -like 'Installation would overwrite existing files*'
@@ -49,7 +53,7 @@ try {
         throw 'Installer did not reject existing destination files without -Force.'
     }
 
-    & $installerPath -Version '5.6-gemini3.7flash' -Force
+    & $installerPath -Version '5.6-gemini3.8flash' -Force
     Write-Host 'PASS: installer copies agents, scripts, and skills; rejects collisions; and supports -Force.'
 }
 finally {
