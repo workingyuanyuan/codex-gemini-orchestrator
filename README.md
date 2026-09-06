@@ -1,14 +1,15 @@
 # codex-gemini-orchestrator
 
-> **早期實驗版本**：目前的 Gemini 3.8 Flash 整合用於初步試驗。路由分數暫沿用 3.7 作為參考，3.8 的實機 CLI 可用性、能力分數與 Medium／High 差異尚待驗證。
+> 目前版本透過已登入的 Antigravity CLI，僅委派給 Gemini 3.8 Flash High。
 
-這個專案解決的主要痛點是：**讓精簡的 `AGENTS.md` 按需載入模型路由 skill，再把任務委派給合適的子代理；其中包含原生 Codex agent 與透過官方 Antigravity CLI 使用外部模型，並沿用既有訂閱登入狀態，不需要 API Key 計費方案。**
+這個專案讓精簡的 `AGENTS.md` 按需載入委派技能，再透過官方 Antigravity CLI 將範圍明確的任務交給 Gemini 3.8 Flash High，沿用既有訂閱登入狀態。
 
 Codex 負責架構、拆解、整合、審查與最終驗收；子代理只執行範圍明確、可客觀驗證的單次任務。
 
 ## 版本
 
-- `versions/5.6-gemini3.8flash/`：目前的早期實驗版本，包含按需載入的路由 skill、原生 GPT-5.6 Terra Max 與 Luna Max agents，以及 Antigravity worker。
+- `versions/6-gemini3.8flash/`：目前版本，包含 Gemini 3.8 Flash High 唯一委派配置、技能與 Antigravity wrapper。
+- `versions/5.6-gemini3.8flash/`：GPT-5.6 配置，包含 Routing Table、Terra／Luna 與 Gemini Medium／High 路由。
 - `versions/5.6-gemini3.7flash/`：已封存，保留作為版本紀錄。
 - `versions/5.6-gemini3.6flash/`：已廢棄，僅保留作為版本紀錄。
 - `versions/5.6-gemini3.5flash/`：已廢棄，僅保留作為版本紀錄。
@@ -17,11 +18,8 @@ Codex 負責架構、拆解、整合、審查與最終驗收；子代理只執�
 目前版本包含：
 
 ```text
-versions/5.6-gemini3.8flash/
+versions/6-gemini3.8flash/
 ├─ AGENTS.md
-├─ agents/
-│  ├─ gpt-5-6-luna-max.toml
-│  └─ gpt-5-6-terra-max.toml
 ├─ scripts/
 │  └─ Invoke-AntigravityAgent.ps1
 └─ skills/
@@ -46,30 +44,28 @@ versions/5.6-gemini3.8flash/
 從專案根目錄執行：
 
 ```powershell
-./install.ps1 -Version 5.6-gemini3.8flash
+./install.ps1 -Version 6-gemini3.8flash
 ```
 
-安裝器會把 `AGENTS.md`、`agents/`、`scripts/` 與 `skills/` 複製到 `$HOME\.codex`。若已有同名檔案，安裝會列出衝突並中止；確認備份後可使用 `-Force` 只覆寫列出的檔案：
+安裝器會把 `AGENTS.md`、`scripts/` 與 `skills/`（有原生 profiles 的歷史版本也會安裝 `agents/`）複製到 `$HOME\.codex`。若已有同名檔案，安裝會列出衝突並中止；確認備份後可使用 `-Force` 只覆寫列出的檔案：
 
 ```powershell
-./install.ps1 -Version 5.6-gemini3.8flash -Force
+./install.ps1 -Version 6-gemini3.8flash -Force
 ```
 
 更新既有安裝也使用上述 `-Force` 指令。它會覆寫同名的本機客製檔案，因此請先備份；更新 skill 後請開啟新的 Codex task，讓新指令被重新載入。
 
-## 模型路由
+## 任務委派
 
-`model-routing-and-delegation-agy` skill 使用以下入口：
+`AGENTS.md` 只定義委派時機與技能入口；模型限制、主代理職責及執行流程集中於 Skill。能節省時間或改善品質時，委派可獨立驗收的並行工作，主代理在等待期間繼續其他獨立工作。此觸發方式依據 [GPT-6 Astra 的 Subagent delegation 指引](https://developers.openai.com/api/docs/guides/latest-model?model=gpt-6-astra#subagent-delegation)，並依 Antigravity 的單層委派流程調整。
 
-- `gpt_5_6_luna_max`：原生 GPT-5.6 Luna Max agent，用於需要探索、跨檔修改或反覆 build-test-fix 的複雜 bounded execution。
-- `gpt_5_6_terra_max`：原生 GPT-5.6 Terra Max agent，用於驗收門檻需要最強 worker Reasoning 或 Coding 分數的 bounded work。
-- `gemini-3.8-flash` → `gemini-3.8-flash-medium`：大多數 bounded work 的預設入口；Coding 與 Agentic 工作沿用 Medium 路由政策。
-- `gemini-3.8-flash-high` → `gemini-3.8-flash-high`：驗收門檻明確需要 High reasoning tier 時使用。
+唯一入口為 `gemini-3.8-flash-high`，精確對應 `agy models` 中的同名 slug。所有委派均使用 Gemini 3.8 Flash High；合約、上下文或環境問題修正後重試一次，仍失敗或能力不足時交回主代理。
 
-Gemini 3.8 Flash 的表列分數暫沿用 3.7 High 作為路由參考；3.8 的實測分數與 Medium／High 能力差異尚待驗證。執行時需要 `agy models` 列出所選的 `gemini-3.8-flash-medium` 或 `gemini-3.8-flash-high` slug。
+```powershell
+& "$HOME\.codex\scripts\Invoke-AntigravityAgent.ps1" -WorkingDirectory $worktree -Model gemini-3.8-flash-high -PromptFile $contract -AutoApprove
+```
 
-GPT-5.6 Sol Max 只作為主代理與能力比較基準，不是可委派的 worker。封裝腳本會用 `agy models` 驗證外部 alias，並透過已登入的 Antigravity 訂閱工作階段執行單次、無狀態任務。
-
+安裝目的地可使用 `-DestinationRoot <path>` 指定。由舊版升級時，請備份本機規則與 profiles，並移除本專案先前安裝的 `gpt-5-6-luna-max.toml`、`gpt-5-6-terra-max.toml`。安裝器僅複製來源檔案；本機 AGENTS.md 的自訂段落應在覆寫前備份並於安裝後合併。
 Antigravity 的 print mode 是 headless 執行，讀取程式碼所需的 command 權限也無法互動核准。因此所有 Antigravity 任務（包括唯讀審查）都必須在專用的 detached worktree 中搭配 `-AutoApprove`；唯讀限制寫進任務契約，完成後再驗證 worktree 沒有 diff。不要對主要 checkout 或共享的 dirty worktree 使用 `-AutoApprove`。wrapper 只在自己的程序及其子程序中信任指定 worktree，不會修改全域 Git 設定；空輸出或已知的 headless 權限拒絕也會回傳失敗，而不會把 exit code 0 誤認為有效結果。
 
 ## 解除腳本的下載來源標記

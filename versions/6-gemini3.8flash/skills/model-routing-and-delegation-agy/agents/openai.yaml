@@ -1,0 +1,4 @@
+interface:
+  display_name: "Model Routing and Delegation (AGY)"
+  short_description: "Delegate bounded work to Gemini 3.8 Flash High"
+  default_prompt: "Use $model-routing-and-delegation-agy to delegate this bounded task to Gemini 3.8 Flash High through Antigravity CLI."

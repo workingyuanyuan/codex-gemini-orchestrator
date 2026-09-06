@@ -24,7 +24,7 @@ function Assert-SequenceEqual {
 }
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
-$wrapperPath = Join-Path $repositoryRoot 'versions\5.6-gemini3.8flash\scripts\Invoke-AntigravityAgent.ps1'
+$wrapperPath = Join-Path $repositoryRoot 'versions\6-gemini3.8flash\scripts\Invoke-AntigravityAgent.ps1'
 $resolvedRepositoryRoot = (Resolve-Path -LiteralPath $repositoryRoot).Path
 $tempBase = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
 $testRoot = [IO.Path]::GetFullPath((Join-Path $tempBase "codex-gemini-orchestrator-wrapper-test-$([guid]::NewGuid())"))
@@ -53,6 +53,7 @@ goto record
 if "%AGY_TEST_MODE%"=="legacy-models" (
   echo gemini-3.7-flash-high
   echo gemini-3.7-flash-medium
+  echo gemini-3.8-flash-medium
   exit /b 0
 )
 echo gemini-3.8-flash-high
@@ -84,7 +85,6 @@ try {
     $globalSafeDirectoriesBefore = @(& git config --global --get-all safe.directory 2>$null)
 
     $modelCases = @(
-        @{ Alias = 'gemini-3.8-flash'; Slug = 'gemini-3.8-flash-medium' }
         @{ Alias = 'gemini-3.8-flash-high'; Slug = 'gemini-3.8-flash-high' }
     )
 
@@ -121,7 +121,7 @@ try {
         Assert-SequenceEqual -Expected $expectedArguments -Actual $actualArguments
     }
 
-    foreach ($retiredAlias in @('gemini-3.7-flash', 'gemini-3.7-flash-high', 'gemini-3.1-pro', 'gemini-3.6-flash', 'gemini-3.5-flash', 'claude-opus-4-6')) {
+    foreach ($retiredAlias in @('gemini-3.8-flash', 'gemini-3.8-flash-medium', 'gemini-3.8-flash-low', 'gpt_5_6_luna_max', 'gpt_5_6_terra_max', 'gemini-3.7-flash', 'gemini-3.7-flash-high', 'gemini-3.1-pro', 'gemini-3.6-flash', 'gemini-3.5-flash', 'claude-opus-4-6')) {
         $wrapperOutput = & pwsh -NoProfile -File $wrapperPath `
             -WorkingDirectory $resolvedRepositoryRoot `
             -Model $retiredAlias `
@@ -165,7 +165,7 @@ try {
         $env:AGY_TEST_MODE = $runtimeCase.Mode
         $wrapperOutput = & pwsh -NoProfile -File $wrapperPath `
             -WorkingDirectory $resolvedRepositoryRoot `
-            -Model 'gemini-3.8-flash' `
+            -Model 'gemini-3.8-flash-high' `
             -PromptFile $promptPath `
             -AutoApprove 2>&1
         $wrapperExitCode = $LASTEXITCODE

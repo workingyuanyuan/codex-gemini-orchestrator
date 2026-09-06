@@ -9,23 +9,29 @@ including AGENTS.md, native agent profiles, scripts, and bundled skills. Existin
 destination files are never overwritten unless -Force is specified.
 
 .PARAMETER Version
-Version directory to install from versions/. Defaults to 5.6-gemini3.8flash.
+Version directory to install from versions/. Defaults to 6-gemini3.8flash.
+
+.PARAMETER DestinationRoot
+Installation root. Defaults to the current user Codex directory.
 
 .PARAMETER Force
 Allows existing destination files to be overwritten. Unrelated files are untouched.
 
 .EXAMPLE
-./install.ps1 -Version 5.6-gemini3.8flash
+./install.ps1 -Version 6-gemini3.8flash
 
 .EXAMPLE
-./install.ps1 -Version 5.6-gemini3.8flash -Force
+./install.ps1 -Version 6-gemini3.8flash -Force
 #>
 
 [CmdletBinding()]
 param(
     [Parameter()]
     [ValidatePattern('^[A-Za-z0-9][A-Za-z0-9.\-]*$')]
-    [string]$Version = '5.6-gemini3.8flash',
+    [string]$Version = '6-gemini3.8flash',
+
+    [ValidateNotNullOrEmpty()]
+    [string]$DestinationRoot = (Join-Path $HOME '.codex'),
 
     [switch]$Force
 )
@@ -48,18 +54,18 @@ if (-not $sourceParent.Equals($versionsRoot.Path, [StringComparison]::OrdinalIgn
 
 $agentSourceDirectory = Join-Path $sourceRoot.Path 'agents'
 $scriptSourceDirectory = Join-Path $sourceRoot.Path 'scripts'
-if (-not (Test-Path -LiteralPath $agentSourceDirectory -PathType Container)) {
-    throw "Version '$Version' is incomplete; agents directory is missing."
-}
+
 if (-not (Test-Path -LiteralPath $scriptSourceDirectory -PathType Container)) {
     throw "Version '$Version' is incomplete; scripts directory is missing."
 }
 
-$agentFiles = @(Get-ChildItem -LiteralPath $agentSourceDirectory -File -Filter '*.toml' | Sort-Object Name)
+$agentFiles = @(
+    if (Test-Path -LiteralPath $agentSourceDirectory -PathType Container) {
+        Get-ChildItem -LiteralPath $agentSourceDirectory -File -Filter '*.toml' | Sort-Object Name
+    }
+)
 $scriptFiles = @(Get-ChildItem -LiteralPath $scriptSourceDirectory -File -Filter '*.ps1' | Sort-Object Name)
-if ($agentFiles.Count -eq 0) {
-    throw "Version '$Version' contains no agent TOML files."
-}
+
 if ($scriptFiles.Count -eq 0) {
     throw "Version '$Version' contains no PowerShell scripts."
 }
@@ -76,7 +82,7 @@ if (Test-Path -LiteralPath $skillSourceDirectory -PathType Container) {
 $sourceFiles = @(
     [pscustomobject]@{
         Source = Join-Path $sourceRoot.Path 'AGENTS.md'
-        DestinationDirectory = Join-Path $HOME '.codex'
+        DestinationDirectory = $DestinationRoot
         DestinationName = 'AGENTS.md'
     }
 )
@@ -84,7 +90,7 @@ $sourceFiles = @(
 foreach ($sourceFile in $agentFiles) {
     $sourceFiles += [pscustomobject]@{
         Source = $sourceFile.FullName
-        DestinationDirectory = Join-Path (Join-Path $HOME '.codex') 'agents'
+        DestinationDirectory = Join-Path $DestinationRoot 'agents'
         DestinationName = $sourceFile.Name
     }
 }
@@ -92,12 +98,12 @@ foreach ($sourceFile in $agentFiles) {
 foreach ($sourceFile in $scriptFiles) {
     $sourceFiles += [pscustomobject]@{
         Source = $sourceFile.FullName
-        DestinationDirectory = Join-Path (Join-Path $HOME '.codex') 'scripts'
+        DestinationDirectory = Join-Path $DestinationRoot 'scripts'
         DestinationName = $sourceFile.Name
     }
 }
 
-$skillsRoot = Join-Path (Join-Path $HOME '.codex') 'skills'
+$skillsRoot = Join-Path $DestinationRoot 'skills'
 foreach ($sourceFile in $skillFiles) {
     $relativePath = [IO.Path]::GetRelativePath($skillSourceDirectory, $sourceFile.FullName)
     $relativeDirectory = Split-Path -Parent $relativePath
@@ -140,4 +146,4 @@ foreach ($file in $sourceFiles) {
     Write-Verbose "Installed $($file.Destination)"
 }
 
-Write-Host "Installed codex-gemini-orchestrator version $Version to $(Join-Path $HOME '.codex')."
+Write-Host "Installed codex-gemini-orchestrator version $Version to $DestinationRoot."

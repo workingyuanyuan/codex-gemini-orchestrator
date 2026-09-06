@@ -8,6 +8,19 @@ The version directory identifies the supported GPT generation, not the project r
 
 ### Added
 
+- Added `6-gemini3.8flash` for GPT-6 orchestration with Gemini 3.8 Flash High as the sole worker.
+
+### Changed
+
+- Set installation defaults, examples, and regression tests to `6-gemini3.8flash`.
+- Simplified AGENTS.md to the parallel-delegation trigger and skill entry point; consolidated execution and recovery rules in the skill.
+- Added installer DestinationRoot support and support for snapshots without native agent profiles.
+- Preserved `5.6-gemini3.8flash` with its original routing table, native profiles, and Gemini Medium/High routes.
+
+## [5.6-gemini3.8flash]
+
+### Added
+
 - Added the `5.6-gemini3.8flash` snapshot with Gemini 3.8 Flash Medium and High worker routes.
 
 - Added a native `gpt_5_6_terra_max` worker profile to the `5.6-gemini3.7flash` snapshot.

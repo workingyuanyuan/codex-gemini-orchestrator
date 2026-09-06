@@ -16,16 +16,13 @@ if (-not $testRoot.StartsWith($tempBase, [StringComparison]::OrdinalIgnoreCase))
 }
 
 $null = New-Item -ItemType Directory -Path $testRoot
-$previousHome = $HOME
+$testDestination = Join-Path $testRoot '.codex'
 try {
-    Set-Variable -Name HOME -Value $testRoot -Scope Global -Force
 
-    & $installerPath
+    & $installerPath -DestinationRoot $testDestination
 
     $expectedFiles = @(
         '.codex\AGENTS.md'
-        '.codex\agents\gpt-5-6-luna-max.toml'
-        '.codex\agents\gpt-5-6-terra-max.toml'
         '.codex\scripts\Invoke-AntigravityAgent.ps1'
         '.codex\skills\model-routing-and-delegation-agy\SKILL.md'
         '.codex\skills\model-routing-and-delegation-agy\agents\openai.yaml'
@@ -36,15 +33,19 @@ try {
         if (-not (Test-Path -LiteralPath $installedPath -PathType Leaf)) {
             throw "Expected installed file is missing: $installedPath"
         }
-        $sourcePath = Join-Path $repositoryRoot ('versions\5.6-gemini3.8flash\' + $relativePath.Substring('.codex\'.Length))
+        $sourcePath = Join-Path $repositoryRoot ('versions\6-gemini3.8flash\' + $relativePath.Substring('.codex\'.Length))
         if ((Get-FileHash -LiteralPath $sourcePath).Hash -cne (Get-FileHash -LiteralPath $installedPath).Hash) {
             throw "Installed file does not match the current snapshot: $relativePath"
         }
     }
 
+    $installedRules = Join-Path $testDestination 'AGENTS.md'
+    Set-Content -LiteralPath $installedRules -Value 'local customization'
+    $unrelatedFile = Join-Path $testDestination 'unrelated.txt'
+    Set-Content -LiteralPath $unrelatedFile -Value 'keep'
     $collisionDetected = $false
     try {
-        & $installerPath -Version '5.6-gemini3.8flash'
+        & $installerPath -DestinationRoot $testDestination -Version '6-gemini3.8flash'
     }
     catch {
         $collisionDetected = $_.Exception.Message -like 'Installation would overwrite existing files*'
@@ -53,11 +54,16 @@ try {
         throw 'Installer did not reject existing destination files without -Force.'
     }
 
-    & $installerPath -Version '5.6-gemini3.8flash' -Force
-    Write-Host 'PASS: installer copies agents, scripts, and skills; rejects collisions; and supports -Force.'
+    & $installerPath -DestinationRoot $testDestination -Version '6-gemini3.8flash' -Force
+    if (Test-Path -LiteralPath (Join-Path $testDestination 'agents')) { throw 'Current snapshot installed native agent profiles.' }
+    if ((Get-FileHash $installedRules).Hash -ne (Get-FileHash (Join-Path $repositoryRoot 'versions/6-gemini3.8flash/AGENTS.md')).Hash) { throw 'Force did not restore snapshot.' }
+    if ((Get-Content $unrelatedFile) -ne 'keep') { throw 'Unrelated file was changed.' }
+    $legacyDestination = Join-Path $testRoot 'legacy'
+    & $installerPath -DestinationRoot $legacyDestination -Version '5.6-gemini3.8flash'
+    if (-not (Test-Path (Join-Path $legacyDestination 'agents/gpt-5-6-luna-max.toml'))) { throw 'Legacy agent profile was not installed.' }
+    Write-Host 'PASS: High-only and legacy installation, collision handling, Force, and unrelated-file preservation.'
 }
 finally {
-    Set-Variable -Name HOME -Value $previousHome -Scope Global -Force
     if (Test-Path -LiteralPath $testRoot) {
         Remove-Item -LiteralPath $testRoot -Recurse -Force
     }
