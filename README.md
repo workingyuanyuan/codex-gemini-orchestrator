@@ -8,6 +8,12 @@ Windows 11 上的 Codex 委派技能。主代理負責架構、整合與驗收�
 
 需要 Windows 11、PowerShell 7、Git、可使用原生子代理的 Codex，以及已登入訂閱帳號的官方 Antigravity CLI（`agy.exe`）。本版依據 Codex CLI `0.158.0-alpha.2.1`、Antigravity CLI `1.2.11` 的介面設計。
 
+從 GitHub ZIP 執行時，若 PowerShell 因 `RemoteSigned` 政策封鎖下載標記，確認來源可信後解除安裝檔標記：
+
+```powershell
+Unblock-File -LiteralPath ./install.ps1
+```
+
 在專案根目錄執行：
 
 ```powershell
