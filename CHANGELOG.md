@@ -2,9 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
-The version directory identifies the supported GPT generation, not the project release version. In-generation bug fixes are applied in place; a new GPT generation receives a new directory.
+Version directories identify model combinations and routing configurations. Fixes stay within the affected configuration.
 
 ## [Unreleased]
+
+### 6-sol-gemini3.8flash
+
+- Added daily defaults Gemini Medium, Luna High, and Sol Medium, with task-specific Gemini High, Luna Max, and Sol High options selected explicitly at dispatch.
+- Separated model selection guidance from the supplied 9-benchmark, 25-benchmark, and within-model effort evidence, preserving their comparison boundaries and common Cost scale.
+- Added a Windows runner with JSON output, bounded results, separate local diagnostics, timeout handling and linked-worktree validation.
+- Made the AGENTS.md trigger opt-in and merged it as a managed block; installation respects CODEX_HOME and defaults to the new snapshot.
+- Added offline runner and installer regression coverage.
 
 ### Added
 

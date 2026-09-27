@@ -1,101 +1,89 @@
 # codex-gemini-orchestrator
 
-> 目前版本透過已登入的 Antigravity CLI，僅委派給 Gemini 3.8 Flash High。
+Windows 11 上的 Codex 委派技能。主代理負責架構、整合與驗收，預設將可完整交接的工作委派給已登入 Antigravity 的 Gemini 3.8 Flash Medium，並在需要原生 Codex 能力時使用 Luna High 或 Sol Medium。依任務需要可選用 Gemini High、Luna Max 或 Sol High。
 
-這個專案讓精簡的 `AGENTS.md` 按需載入委派技能，再透過官方 Antigravity CLI 將範圍明確的任務交給 Gemini 3.8 Flash High，沿用既有訂閱登入狀態。
+目前版本：`6-sol-gemini3.8flash`。
 
-Codex 負責架構、拆解、整合、審查與最終驗收；子代理只執行範圍明確、可客觀驗證的單次任務。
+## 安裝
 
-## 版本
+需要 Windows 11、PowerShell 7、Git、可使用原生子代理的 Codex，以及已登入訂閱帳號的官方 Antigravity CLI（`agy.exe`）。本版依據 Codex CLI `0.158.0-alpha.2.1`、Antigravity CLI `1.2.11` 的介面設計。
 
-- `versions/6-gemini3.8flash/`：目前版本，包含 Gemini 3.8 Flash High 唯一委派配置、技能與 Antigravity wrapper。
-- `versions/5.6-gemini3.8flash/`：GPT-5.6 配置，包含 Routing Table、Terra／Luna 與 Gemini Medium／High 路由。
-- `versions/5.6-gemini3.7flash/`：已封存，保留作為版本紀錄。
-- `versions/5.6-gemini3.6flash/`：已廢棄，僅保留作為版本紀錄。
-- `versions/5.6-gemini3.5flash/`：已廢棄，僅保留作為版本紀錄。
-- `versions/5.6/`：早期 GPT-5.6 多模型路由基準。
+在專案根目錄執行：
 
-目前版本包含：
+```powershell
+./install.ps1 -InstallDelegationTrigger
+```
+
+安裝位置為 `$env:CODEX_HOME`，未設定時使用 `$HOME\.codex`。`-InstallDelegationTrigger` 將一句委派時機合併到 `AGENTS.md` 的專用區塊，保留區塊外的文字。若已有自己的委派時機，執行 `./install.ps1` 即可安裝技能與 runner。
+
+同名套件檔案已存在時，加上 `-Force` 更新：
+
+```powershell
+./install.ps1 -InstallDelegationTrigger -Force
+```
+
+`-Force` 會替換同名套件檔案及專用指令區塊；請先備份套件檔案中的個人修改。安裝後開啟新的 Codex 對話。
+
+其他參數：`-Version <版本目錄名稱>`、`-DestinationRoot <安裝目錄>`。歷史版本仍可指定安裝；其中的原生 agent profiles 會隨該版本複製。升級時若本機有較早版本的委派規則或 `gpt-5-6-*.toml`，請檢查並移除已淘汰的規則，以免與新路由衝突。
+
+## 使用
+
+可以直接要求：
 
 ```text
-versions/6-gemini3.8flash/
+使用 $model-routing-and-delegation-agy，將這項工作中可獨立驗收的部分委派出去。
+```
+
+| 工作 | 日常預設 | 選用較高 effort 的條件 |
+| --- | --- | --- |
+| 可完整交接、Antigravity 工具足以完成的研究、分析、實作、審查 | Gemini 3.8 Flash Medium | High：深入推理、知識整合或較多不確定性 |
+| 需要原生 Codex 工具或上下文的窄範圍、明確工作 | GPT-6 Luna High | Max：範圍仍集中，但推論或驗證較困難 |
+| 需要原生 Codex 工具或上下文、路徑清楚的多步工作 | GPT-6 Sol Medium | High：複雜除錯、跨模組追蹤、假設與邊界條件分析 |
+
+主代理沿用使用者選定的模型與 effort，負責架構、整合與最終驗收。委派時依任務直接選用合適的配置；Luna Max 與 Sol Medium 依工作範圍及協調需求區分。
+
+原生子代理在 spawn 時明確指定模型與 effort。選擇有疑義時查閱 [models.md](versions/6-sol-gemini3.8flash/skills/model-routing-and-delegation-agy/references/models.md)；完整數據、來源與比較範圍在 [benchmarks.md](versions/6-sol-gemini3.8flash/skills/model-routing-and-delegation-agy/references/benchmarks.md)。跨模型比較使用共同的 9 項或 25 項評測資料，各模型獨立的 effort 保留率僅用於同模型內比較。
+
+Gemini 的呼叫方式：
+
+```powershell
+$codexRoot = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME '.codex' }
+$runner = Join-Path $codexRoot 'scripts/Invoke-AntigravityAgent.ps1'
+& $runner -WorkingDirectory $worktree -PromptFile $contract -Model gemini-3.8-flash-medium -AutoApprove
+```
+
+`$worktree` 是乾淨、專用的 linked Git worktree 根目錄；`$contract` 是位於該 worktree 外的 UTF-8 任務檔。High 使用 `-Model gemini-3.8-flash-high`。runner 回傳精簡 JSON，完整結果與診斷存放於各次執行的本機目錄。主代理檢查退出碼、狀態及產物，再整合結果。工作目錄隔離不等於檔案系統沙箱，`-AutoApprove` 會允許 Antigravity 自動執行工具。
+
+參數、回傳欄位與排錯請見 [Antigravity operations](versions/6-sol-gemini3.8flash/skills/model-routing-and-delegation-agy/references/antigravity.md)。
+
+## 設計與檔案
+
+[架構說明](docs/architecture.md) 記錄技能、AGENTS.md、原生 TOML、CLI、SDK、自訂 provider 與 MCP 的選擇依據，並連結官方文件。
+
+```text
+versions/6-sol-gemini3.8flash/
 ├─ AGENTS.md
-├─ scripts/
-│  └─ Invoke-AntigravityAgent.ps1
-└─ skills/
-   └─ model-routing-and-delegation-agy/
-      ├─ SKILL.md
-      └─ agents/
-         └─ openai.yaml
+├─ scripts/Invoke-AntigravityAgent.ps1
+└─ skills/model-routing-and-delegation-agy/
+   ├─ SKILL.md
+   ├─ agents/openai.yaml
+   └─ references/
+      ├─ models.md
+      ├─ benchmarks.md
+      └─ antigravity.md
 ```
 
-## 需求
+歷史配置保留在 `versions/6-gemini3.8flash/` 與 `versions/5.6*/`。版本目錄區分模型組合及路由配置。
 
-- Windows 10 或 Windows 11
-- PowerShell 7 (`pwsh`)
-- Git
-- Codex CLI
-- 官方 Antigravity CLI（`agy`），且已登入可使用對應模型的訂閱帳號
+## 驗證
 
-不需要 API Key，也不要把憑證、Token 或 API Key 寫入設定、任務契約或版本庫。
-
-## 安裝目前版本
-
-從專案根目錄執行：
+在 PowerShell 7 執行離線回歸測試：
 
 ```powershell
-./install.ps1 -Version 6-gemini3.8flash
+pwsh -NoProfile -File ./tests/Invoke-AntigravityAgent.Tests.ps1
+pwsh -NoProfile -File ./tests/Install.Tests.ps1
 ```
 
-安裝器會把 `AGENTS.md`、`scripts/` 與 `skills/`（有原生 profiles 的歷史版本也會安裝 `agents/`）複製到 `$HOME\.codex`。若已有同名檔案，安裝會列出衝突並中止；確認備份後可使用 `-Force` 只覆寫列出的檔案：
+runner 測試使用本機假執行檔與臨時 Git 專案，安裝測試使用臨時目的地。
 
-```powershell
-./install.ps1 -Version 6-gemini3.8flash -Force
-```
-
-更新既有安裝也使用上述 `-Force` 指令。它會覆寫同名的本機客製檔案，因此請先備份；更新 skill 後請開啟新的 Codex task，讓新指令被重新載入。
-
-## 任務委派
-
-`AGENTS.md` 只定義委派時機與技能入口；模型限制、主代理職責及執行流程集中於 Skill。能節省時間或改善品質時，委派可獨立驗收的並行工作，主代理在等待期間繼續其他獨立工作。此觸發方式依據 [GPT-6 Astra 的 Subagent delegation 指引](https://developers.openai.com/api/docs/guides/latest-model?model=gpt-6-astra#subagent-delegation)，並依 Antigravity 的單層委派流程調整。
-
-唯一入口為 `gemini-3.8-flash-high`，精確對應 `agy models` 中的同名 slug。所有委派均使用 Gemini 3.8 Flash High；合約、上下文或環境問題修正後重試一次，仍失敗或能力不足時交回主代理。
-
-```powershell
-& "$HOME\.codex\scripts\Invoke-AntigravityAgent.ps1" -WorkingDirectory $worktree -Model gemini-3.8-flash-high -PromptFile $contract -AutoApprove
-```
-
-安裝目的地可使用 `-DestinationRoot <path>` 指定。由舊版升級時，請備份本機規則與 profiles，並移除本專案先前安裝的 `gpt-5-6-luna-max.toml`、`gpt-5-6-terra-max.toml`。安裝器僅複製來源檔案；本機 AGENTS.md 的自訂段落應在覆寫前備份並於安裝後合併。
-Antigravity 的 print mode 是 headless 執行，讀取程式碼所需的 command 權限也無法互動核准。因此所有 Antigravity 任務（包括唯讀審查）都必須在專用的 detached worktree 中搭配 `-AutoApprove`；唯讀限制寫進任務契約，完成後再驗證 worktree 沒有 diff。不要對主要 checkout 或共享的 dirty worktree 使用 `-AutoApprove`。wrapper 只在自己的程序及其子程序中信任指定 worktree，不會修改全域 Git 設定；空輸出或已知的 headless 權限拒絕也會回傳失敗，而不會把 exit code 0 誤認為有效結果。
-
-## 解除腳本的下載來源標記
-
-從 GitHub 下載 ZIP，或重新複製帶有 Mark of the Web 的腳本時，新檔案可能再次附帶 `Zone.Identifier`，導致 PowerShell 在 `RemoteSigned` 政策下拒絕執行。每次重新下載或複製後都應重新檢查。
-
-先檢查標記：
-
-```powershell
-$scriptPath = "$HOME\.codex\scripts\Invoke-AntigravityAgent.ps1"
-
-Get-Item -LiteralPath $scriptPath |
-    Get-Item -Stream Zone.Identifier -ErrorAction SilentlyContinue
-```
-
-若有輸出，解除標記：
-
-```powershell
-Unblock-File -LiteralPath $scriptPath
-```
-
-再次確認：
-
-```powershell
-Get-Item -LiteralPath $scriptPath |
-    Get-Item -Stream Zone.Identifier -ErrorAction SilentlyContinue
-```
-
-沒有輸出即代表標記已移除。
-
-## 授權與貢獻
-
-本專案採用 [MIT License](LICENSE)。提交變更前請閱讀 [CONTRIBUTING.md](CONTRIBUTING.md)，安全性問題請參閱 [SECURITY.md](SECURITY.md)。
+本專案採用 [MIT License](LICENSE)。貢獻流程見 [CONTRIBUTING.md](CONTRIBUTING.md)，安全問題見 [SECURITY.md](SECURITY.md)。

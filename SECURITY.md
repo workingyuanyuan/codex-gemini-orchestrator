@@ -2,10 +2,11 @@
 
 ## Supported versions
 
-Version directories identify supported GPT generations, not project releases. Security and compatibility fixes are applied within the affected generation directory. A new directory is reserved for support of a new GPT generation and its corresponding routing configuration.
+Version directories identify model combinations and routing configurations. Security and compatibility fixes are applied within the affected configuration.
 
 | Version | Supported |
 | --- | --- |
+| 6-sol-gemini3.8flash | Yes |
 | 5.6 | Yes |
 | Earlier or unofficial copies | No |
 

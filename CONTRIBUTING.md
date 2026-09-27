@@ -12,7 +12,7 @@ Thank you for helping improve `codex-gemini-orchestrator`.
 
 ## Versioned changes
 
-Directories under `versions/` identify supported GPT generations, not project release versions. Apply bug fixes, security hardening, documentation corrections, and compatibility repairs inside the existing generation directory. Create a new directory—such as `versions/6.0/`—when adding GPT-6.0 and its corresponding routing table; do not create a new directory merely for a project bug fix.
+Directories under `versions/` identify model combinations and routing configurations. Apply fixes within the affected configuration. Create a new directory for an explicitly requested model or routing generation, not merely for a bug fix. The current configuration is `6-sol-gemini3.8flash`.
 
 The model scores and routing policy are deliberate inputs. A pull request that changes them must explain the evidence and compatibility impact. Do not average the capability dimensions into a new composite or trade away the task-specific quality threshold for cost.
 
@@ -22,7 +22,7 @@ The model scores and routing policy are deliberate inputs. A pull request that c
 2. Keep the change focused and avoid unrelated cleanup.
 3. Update documentation and `CHANGELOG.md` when behavior or compatibility changes.
 4. Validate every TOML file with a TOML 1.0 parser.
-5. Parse every `.ps1` file with PowerShell 7 and run `pwsh -NoProfile -File .\tests\Invoke-AntigravityAgent.Tests.ps1`.
+5. Parse every `.ps1` file with PowerShell 7 and run `pwsh -NoProfile -File .\tests\Invoke-AntigravityAgent.Tests.ps1` and `pwsh -NoProfile -File .\tests\Install.Tests.ps1`. These use offline disposable fixtures.
 6. Confirm README parameter names, paths, and examples match the scripts.
 7. Review the complete diff for secrets and machine-specific data.
 8. Open a pull request that includes the commands run and their results.

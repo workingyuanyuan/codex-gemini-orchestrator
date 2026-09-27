@@ -4,40 +4,45 @@
 Installs a versioned Codex multi-model orchestration configuration.
 
 .DESCRIPTION
-Copies one versioned configuration snapshot into the current user's .codex directory,
-including AGENTS.md, native agent profiles, scripts, and bundled skills. Existing
-destination files are never overwritten unless -Force is specified.
+Copies scripts, bundled skills, and any native agent profiles into the Codex directory.
+Optionally merges the snapshot's AGENTS.md into a managed block, preserving other instructions.
+Existing destination files are never overwritten unless -Force is specified.
 
 .PARAMETER Version
-Version directory to install from versions/. Defaults to 6-gemini3.8flash.
+Version directory to install from versions/. Defaults to 6-sol-gemini3.8flash.
 
 .PARAMETER DestinationRoot
 Installation root. Defaults to the current user Codex directory.
 
 .PARAMETER Force
-Allows existing destination files to be overwritten. Unrelated files are untouched.
+Allows packaged files and the managed AGENTS.md block to be replaced.
+
+.PARAMETER InstallDelegationTrigger
+Adds the snapshot's instructions to a managed block in AGENTS.md.
 
 .EXAMPLE
-./install.ps1 -Version 6-gemini3.8flash
+./install.ps1 -InstallDelegationTrigger
 
 .EXAMPLE
-./install.ps1 -Version 6-gemini3.8flash -Force
+./install.ps1 -InstallDelegationTrigger -Force
 #>
 
 [CmdletBinding()]
 param(
     [Parameter()]
     [ValidatePattern('^[A-Za-z0-9][A-Za-z0-9.\-]*$')]
-    [string]$Version = '6-gemini3.8flash',
+    [string]$Version = '6-sol-gemini3.8flash',
 
     [ValidateNotNullOrEmpty()]
-    [string]$DestinationRoot = (Join-Path $HOME '.codex'),
+    [string]$DestinationRoot = $(if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME '.codex' }),
 
+    [switch]$InstallDelegationTrigger,
     [switch]$Force
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$DestinationRoot = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($DestinationRoot)
 
 $versionsRoot = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot 'versions') -ErrorAction Stop
 $sourceCandidate = Join-Path $versionsRoot.Path $Version
@@ -79,13 +84,7 @@ if (Test-Path -LiteralPath $skillSourceDirectory -PathType Container) {
     )
 }
 
-$sourceFiles = @(
-    [pscustomobject]@{
-        Source = Join-Path $sourceRoot.Path 'AGENTS.md'
-        DestinationDirectory = $DestinationRoot
-        DestinationName = 'AGENTS.md'
-    }
-)
+$sourceFiles = @()
 
 foreach ($sourceFile in $agentFiles) {
     $sourceFiles += [pscustomobject]@{
@@ -136,6 +135,35 @@ if ($collisions.Count -gt 0 -and -not $Force) {
     throw "Installation would overwrite existing files. No files were copied. Re-run with -Force to replace only these files:$([Environment]::NewLine)$collisionList"
 }
 
+# Prepare the optional block before copying anything, so malformed instructions fail early.
+$instructionsPath = Join-Path $DestinationRoot 'AGENTS.md'
+$instructionsText = $null
+if ($InstallDelegationTrigger) {
+    $startMarker = '<!-- codex-gemini-orchestrator:start -->'
+    $endMarker = '<!-- codex-gemini-orchestrator:end -->'
+    $sourceInstructions = Get-Content -LiteralPath (Join-Path $sourceRoot.Path 'AGENTS.md') -Raw
+    $block = "$startMarker`n$($sourceInstructions.Trim())`n$endMarker"
+    $existing = if (Test-Path -LiteralPath $instructionsPath) { [IO.File]::ReadAllText($instructionsPath) } else { '' }
+    $starts = [regex]::Matches($existing, [regex]::Escape($startMarker))
+    $ends = [regex]::Matches($existing, [regex]::Escape($endMarker))
+    if ($starts.Count -ne $ends.Count -or $starts.Count -gt 1 -or
+        ($starts.Count -eq 1 -and $starts[0].Index -ge $ends[0].Index)) {
+        throw 'AGENTS.md contains an invalid managed block; repair its markers before installation.'
+    }
+    if ($starts.Count -eq 1) {
+        $offset = $starts[0].Index
+        $length = $ends[0].Index + $endMarker.Length - $offset
+        if (-not $Force -and $existing.Substring($offset, $length) -cne $block) {
+            throw 'Replacing the managed AGENTS.md block requires -Force.'
+        }
+        $instructionsText = $existing.Substring(0, $offset) + $block + $existing.Substring($offset + $length)
+    }
+    else {
+        $separator = if ($existing.Length -gt 0) { "`n`n" } else { '' }
+        $instructionsText = $existing + $separator + $block + "`n"
+    }
+}
+
 $destinationDirectories = $sourceFiles.DestinationDirectory | Sort-Object -Unique
 foreach ($directory in $destinationDirectories) {
     $null = New-Item -ItemType Directory -Path $directory -Force
@@ -144,6 +172,10 @@ foreach ($directory in $destinationDirectories) {
 foreach ($file in $sourceFiles) {
     Copy-Item -LiteralPath $file.Source -Destination $file.Destination -Force:$Force
     Write-Verbose "Installed $($file.Destination)"
+}
+
+if ($InstallDelegationTrigger) {
+    [IO.File]::WriteAllText($instructionsPath, $instructionsText, [Text.UTF8Encoding]::new($false))
 }
 
 Write-Host "Installed codex-gemini-orchestrator version $Version to $DestinationRoot."
