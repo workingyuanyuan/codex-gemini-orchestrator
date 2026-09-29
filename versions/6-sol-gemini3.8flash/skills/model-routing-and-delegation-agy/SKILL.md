@@ -14,10 +14,10 @@ Prefer Gemini for self-contained research, analysis, implementation, and review 
 | Worker | Default effort and task fit | Choose higher effort when |
 | --- | --- | --- |
 | Gemini 3.8 Flash | `medium`: self-contained work with a clear deliverable | `high`: deeper reasoning, knowledge synthesis, or substantial uncertainty |
-| GPT-6 Luna | `high`: narrow native search, extraction, code mapping, and local changes | `max`: scope remains narrow but inference or verification is demanding |
-| GPT-6 Sol | `medium`: native multi-step work with a clear path | `high`: complex debugging, cross-module tracing, assumptions, or edge cases |
+| GPT-6 Luna | `high`: native evidence gathering and straightforward changes whose correctness is quick to check | `max`: bounded judgment where subtle mistakes would cause substantial rework |
+| GPT-6 Sol | `medium`: native multi-step work with a clear path | `high`: complex debugging, cross-module tracing, assumptions, or edge cases; `xhigh`: difficult bounded assignments requiring sustained testing of competing hypotheses or reconciliation of conflicting evidence |
 
-Choose the appropriate effort at dispatch; higher effort does not require a failed default attempt. Distinguish Luna max from Sol medium by scope and coordination needs. Read [model selection evidence](references/models.md) only when task fit is unclear or routing is being reviewed.
+Choose the appropriate effort at dispatch; higher effort does not require a failed default attempt. Prefer Luna max for work that can run independently of the main agent's next step. Distinguish Luna max from Sol medium by scope and coordination needs. Read [model selection evidence](references/models.md) only when task fit is unclear or routing is being reviewed.
 
 For native workers, explicitly set `model` (`gpt-6-luna` or `gpt-6-sol`) and `reasoning_effort` from the table. With `collaboration.spawn_agent`, use `fork_turns: "none"` and a self-contained handoff; include limited history only when necessary and supported. Avoid custom agent configurations that override the selected model or effort. Honor the runtime's available models and controls; if a route is unavailable, report it and choose a suitable available worker or the main agent. Keep the main agent's model and effort.
 
@@ -28,6 +28,8 @@ Provide the objective, essential context or file locations, allowed changes, and
 Review the relevant artifacts and evidence before integrating. Check consequential changes directly without repeating the worker's investigation. Diagnose incomplete results before retrying: correct missing context or environment defects, or select a worker suited to the unmet requirement. Retry a corrected context or environment failure once; if it repeats, use a suitable alternative or complete the task in the main agent.
 
 ## Run Gemini
+
+Before dispatch, tell the user the Gemini model, effort, and task in one sentence. After it returns, include the outcome or blocker in the next necessary update, distinguishing returned work from accepted work. Combine notices for a batch of tasks.
 
 Use an authenticated Antigravity subscription session and a dedicated, clean linked Git worktree. Save the task as a UTF-8 file outside it. Include relevant uncommitted source changes in the worker's clean snapshot when needed. The worktree separates changes but is not a filesystem sandbox. For read-only work, prohibit writes in the task and verify a clean worktree afterward.
 

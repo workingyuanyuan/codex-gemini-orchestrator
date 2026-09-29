@@ -4,54 +4,51 @@ Read when task fit is unclear, a worker leaves a capability gap, or routing is b
 
 ## Tool and scope fit
 
-Gemini is the preferred worker when a self-contained handoff and Antigravity's tools can complete the assignment. Choose native Codex workers when they need a Codex tool, essential context that cannot be transferred effectively, or capabilities suited to an observed shortfall.
+Prefer Gemini when a self-contained handoff and Antigravity's tools can complete the assignment. Choose native Codex workers for required Codex tools, essential context that cannot be transferred effectively, or capabilities suited to an observed shortfall.
 
-For native work, use Luna for a narrow deliverable with clear boundaries. Choose Sol when completion requires coordinating several steps, tracing interactions across modules, or maintaining a larger working context. Luna max and Sol medium serve different task shapes; their effort labels do not establish a shared capability scale.
+Use Luna for a narrow deliverable. Choose Sol when completion requires coordinating several steps, tracing interactions across modules, or maintaining a larger working context. Luna max and Sol medium serve different task shapes; effort labels do not establish a shared capability scale.
 
-The main agent retains requirements, architecture, integration, and final acceptance at the user's selected model and effort. Astra measurements provide reference context. Routine selection uses the task's requirements without inspecting the main agent's model or calculating a score gap.
+The user selects the main agent's model and effort. The main agent retains requirements, architecture, integration, and final acceptance, and selects workers from the subtask's needs.
 
 ## Effort selection
 
-### Gemini: medium by default, high for depth
+### Gemini: medium for clear deliverables, high for depth
 
-Medium suits self-contained research, organization, implementation, and review with a clear deliverable. Select high when substantial uncertainty, deeper reasoning, or knowledge synthesis is central to completion.
+Use medium for self-contained research, organization, implementation, and review with a clear deliverable. Select high when substantial uncertainty, deeper reasoning, or knowledge synthesis is central to completion.
 
-On the shared nine benchmarks, medium leads high on AA-LCR and Frontier Code 1.1, ties AutomationBench, and trails on six others. Frontier Code is 41.2 versus 38.0, while SciCode is 55.1 versus 56.6. These mixed results do not establish a general coding advantage for medium. High leads by 6.0 on CritPt and 5.7 on Humanity's Last Exam. Medium's Cost is 35.8% lower.
+The [shared ten benchmarks](benchmarks.md#shared-10-benchmark-comparison) show mixed coding results between Gemini's efforts: medium leads on Frontier Code, while high leads on SciCode. High's stronger ARC-AGI 2, CritPt, and Humanity's Last Exam results support considering it for deeper work. These measurements inform task fit without establishing a universal coding advantage for either effort.
 
-### Luna: high by default, max for demanding narrow work
+### Luna: high for readily checked work, max for consequential judgment
 
-High suits native search, extraction, code mapping, and local modifications with clear acceptance criteria. Select max when the assignment remains narrow but requires substantial inference or verification. Move to Sol when scope and coordination become the main difficulty.
+High suits evidence gathering and straightforward changes whose correctness is quick to check: locating call sites, extracting configuration, or applying a clear local specification.
 
-Within Luna's separate effort dataset, high has 35.8% lower Cost than max, with 22.0% lower Reasoning and 15.1% lower Agentic scores. These are measured score changes within Luna's dataset, not predicted task failure rates.
+Choose max for bounded judgment where subtle mistakes would cause substantial main-agent rework. For example, assess whether one error-handling path misses an exception and return the evidence supporting that conclusion. Weigh review and rework against latency; the user's low concern about Luna's direct cost makes these the more useful selection criteria.
 
-### Sol: medium by default, high for complex logic
+Prefer max when its assignment can run independently of the main agent's next step. If the answer blocks immediate progress, consider narrowing the handoff to evidence gathering with high and keeping the dependent judgment in the main agent. Move to Sol when scope and coordination become the main difficulty.
+
+### Sol: medium for a clear path, high for complex logic, xhigh for sustained reasoning
 
 Medium suits native multi-step work with a clear implementation or investigation path. Select high for complex debugging, cross-module tracing, checking assumptions, or working through edge cases.
 
-High exceeds medium on all nine shared benchmarks for about 7.9% higher Cost. The largest point increases are AA-Briefcase (+8.6) and AutomationBench (+4.3). This supports choosing high directly for demanding tasks while keeping medium as the routine entry.
+Select xhigh for difficult, bounded assignments requiring sustained testing of competing hypotheses or reconciliation of conflicting evidence. File count or step count alone is insufficient to establish that need. Choose the appropriate effort at dispatch.
 
-## Cross-model tradeoffs
+On the shared ten benchmarks, high improves on medium throughout. Xhigh improves on high on most benchmarks but trails on AA-LCR. This supports a deeper option for demanding assignments while leaving task shape and available tools central to selection.
 
-Two comparisons help resolve common routing questions on the shared nine-benchmark set:
+## Interpreting the evidence
 
-- **Gemini medium and Luna high:** both have Cost 18.1. Gemini scores higher on eight benchmarks; Luna scores higher on CritPt (15.4 versus 12.3). Tool access and scope explain Luna's native role.
-- **Gemini high and Sol high:** Gemini leads on AA-Briefcase, AA-Omniscience, GDPval-AA, Humanity's Last Exam, and SciCode. Sol leads on AA-LCR, AutomationBench, CritPt, and Frontier Code 1.1. Sol's leads on CritPt and Frontier Code are 7.1 and 9.7 points. Neither profile leads on every benchmark.
-
-These observations inform task-fit judgments; benchmark counts do not establish overall task quality. Consider the unmet requirement and available tools before changing model or effort after an incomplete result. Missing context, authentication, or an unavailable tool needs its own correction.
-
-## Evidence coverage
+Gemini medium and Luna high have the same supplied cost index; tool access and scope explain Luna's native role. Gemini high and Sol high each lead on different shared benchmarks, supporting task-specific selection.
 
 | Evidence in [benchmarks.md](benchmarks.md) | Use |
 | --- | --- |
-| Shared 9 benchmarks, all 12 profiles | Direct cross-model and cross-effort comparison on those nine benchmarks |
-| Shared 25 benchmarks, four baseline profiles | Broader comparison at Astra max, Sol max, Gemini high, and Luna max |
-| Separate within-model effort datasets | Effort tradeoffs within each model only |
-| Common Cost scale | Relative cost across supplied profiles; lower is better |
+| Shared 10 benchmarks, 13 profiles | Direct cross-model and cross-effort comparison on those benchmarks |
+| Shared 27 benchmarks, four baseline profiles | Broader comparison at Astra max, Sol max, Gemini high, and Luna max |
+| Within-model effort datasets | Effort tradeoffs within each model's matched coverage |
+| Weighted Cost Index | Relative cost under the same source selection and normalization; lower is better |
 
-The nine benchmarks are a subset of the 25; their overlapping results are not independent evidence. Different models' separate effort datasets use different benchmark coverage. Do not compare those aggregates across models or apply their retention ratios to the shared tables. Cost uses the user's conversion and does not directly measure Codex allowance or total workflow expenditure.
+The ten benchmarks are a subset of the 27. Within-model datasets have different coverage across models; their aggregates and retention ratios cannot reconstruct comparable shared-set scores. Cost is logarithmically normalized: index point differences do not establish dollar or Codex quota savings. These routing choices combine evidence with workflow judgment, rather than predicting task success from scores.
 
 ## Official guidance
 
-[OpenAI's subagent guidance](https://learn.chatgpt.com/docs/agent-configuration/subagents#choosing-models-and-reasoning) describes Sol for demanding multi-step work and Luna for narrow, repeatable work, with medium and high as their respective starting efforts. It recommends higher effort for complex logic, assumptions, and edge cases. [Astra's guide](https://developers.openai.com/api/docs/guides/latest-model) covers difficult end-to-end work.
+[OpenAI's subagent guidance](https://learn.chatgpt.com/docs/agent-configuration/subagents#choosing-models-and-reasoning) recommends Sol for demanding multi-step work and Luna for narrow, repeatable work, starting at medium and high respectively. It associates high with complex logic and xhigh with especially demanding reasoning. The [Astra skills guidance](https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra) supports concise decision criteria and references loaded as needed.
 
-The routing choices here combine that guidance with the user's supplied evidence and the available tools. The six enabled configurations are Gemini medium/high, Luna high/max, and Sol medium/high.
+The seven enabled configurations are Gemini medium/high, Luna high/max, and Sol medium/high/xhigh.

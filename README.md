@@ -1,6 +1,6 @@
 # codex-gemini-orchestrator
 
-Windows 11 上的 Codex 委派技能。主代理負責架構、整合與驗收，預設將可完整交接的工作委派給已登入 Antigravity 的 Gemini 3.8 Flash Medium，並在需要原生 Codex 能力時使用 Luna High 或 Sol Medium。依任務需要可選用 Gemini High、Luna Max 或 Sol High。
+Windows 11 上的 Codex 委派技能。主代理負責架構、整合與驗收，預設將可完整交接的工作委派給已登入 Antigravity 的 Gemini 3.8 Flash Medium，並在需要原生 Codex 能力時使用 Luna High 或 Sol Medium。依任務需要可選用 Gemini High、Luna Max、Sol High 或 Sol xHigh。
 
 目前版本：`6-sol-gemini3.8flash`。
 
@@ -43,12 +43,14 @@ Unblock-File -LiteralPath ./install.ps1
 | 工作 | 日常預設 | 選用較高 effort 的條件 |
 | --- | --- | --- |
 | 可完整交接、Antigravity 工具足以完成的研究、分析、實作、審查 | Gemini 3.8 Flash Medium | High：深入推理、知識整合或較多不確定性 |
-| 需要原生 Codex 工具或上下文的窄範圍、明確工作 | GPT-6 Luna High | Max：範圍仍集中，但推論或驗證較困難 |
-| 需要原生 Codex 工具或上下文、路徑清楚的多步工作 | GPT-6 Sol Medium | High：複雜除錯、跨模組追蹤、假設與邊界條件分析 |
+| 需要原生 Codex 工具或上下文，結果容易核對的證據蒐集與明確修改 | GPT-6 Luna High | Max：範圍有限的判斷，細微錯誤會造成主代理大量返工；優先承接可並行的工作 |
+| 需要原生 Codex 工具或上下文、路徑清楚的多步工作 | GPT-6 Sol Medium | High：複雜除錯、跨模組追蹤、假設與邊界條件分析；xHigh：需持續檢驗多個假設或釐清矛盾證據的困難子任務 |
 
 主代理沿用使用者選定的模型與 effort，負責架構、整合與最終驗收。委派時依任務直接選用合適的配置；Luna Max 與 Sol Medium 依工作範圍及協調需求區分。
 
-原生子代理在 spawn 時明確指定模型與 effort。選擇有疑義時查閱 [models.md](versions/6-sol-gemini3.8flash/skills/model-routing-and-delegation-agy/references/models.md)；完整數據、來源與比較範圍在 [benchmarks.md](versions/6-sol-gemini3.8flash/skills/model-routing-and-delegation-agy/references/benchmarks.md)。跨模型比較使用共同的 9 項或 25 項評測資料，各模型獨立的 effort 保留率僅用於同模型內比較。
+原生子代理在 spawn 時明確指定模型與 effort。選擇有疑義時查閱 [models.md](versions/6-sol-gemini3.8flash/skills/model-routing-and-delegation-agy/references/models.md)；完整數據、來源與比較範圍在 [benchmarks.md](versions/6-sol-gemini3.8flash/skills/model-routing-and-delegation-agy/references/benchmarks.md)。跨模型比較使用共同的 10 項（13 profiles）或 27 項（4 profiles）評測資料，各模型獨立的 effort 保留率僅用於同模型內比較。Weighted Cost Index 越低越好，指數點差不代表實際費用或額度的節省比例。
+
+委派 Gemini 前，主代理以一句話交代模型、effort 與任務；結果返回後，在下一則必要更新交代結果或阻礙，並區分工作完成與主代理驗收。同批任務合併提示。
 
 Gemini 的呼叫方式：
 

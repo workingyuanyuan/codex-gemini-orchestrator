@@ -8,8 +8,10 @@ Version directories identify model combinations and routing configurations. Fixe
 
 ### 6-sol-gemini3.8flash
 
-- Added daily defaults Gemini Medium, Luna High, and Sol Medium, with task-specific Gemini High, Luna Max, and Sol High options selected explicitly at dispatch.
-- Separated model selection guidance from the supplied 9-benchmark, 25-benchmark, and within-model effort evidence, preserving their comparison boundaries and common Cost scale.
+- Added daily defaults Gemini Medium, Luna High, and Sol Medium, with task-specific Gemini High, Luna Max, Sol High, and Sol xHigh options selected explicitly at dispatch.
+- Defined Luna effort selection around readily checked work, consequential bounded judgment, and latency; assigned Sol xHigh to sustained hypothesis testing or conflicting evidence.
+- Added concise Gemini dispatch and result notices, combining updates for a batch of tasks and distinguishing returned work from acceptance.
+- Separated model selection guidance from the supplied 10-benchmark / 13-profile, 27-benchmark / 4-profile, and within-model effort evidence, preserving their comparison boundaries and interpreting Weighted Cost Index as a normalized index.
 - Added a Windows runner with JSON output, bounded results, separate local diagnostics, timeout handling and linked-worktree validation.
 - Made the AGENTS.md trigger opt-in and merged it as a managed block; installation respects CODEX_HOME and defaults to the new snapshot.
 - Added offline runner and installer regression coverage.
