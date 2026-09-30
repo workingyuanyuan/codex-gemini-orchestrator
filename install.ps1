@@ -9,7 +9,7 @@ Optionally merges the snapshot's AGENTS.md into a managed block, preserving othe
 Existing destination files are never overwritten unless -Force is specified.
 
 .PARAMETER Version
-Version directory to install from versions/. Defaults to 6-sol-gemini3.8flash.
+Version directory to install from versions/. Defaults to 6.1-sol-gemini3.8flash.
 
 .PARAMETER DestinationRoot
 Installation root. Defaults to the current user Codex directory.
@@ -31,7 +31,7 @@ Adds the snapshot's instructions to a managed block in AGENTS.md.
 param(
     [Parameter()]
     [ValidatePattern('^[A-Za-z0-9][A-Za-z0-9.\-]*$')]
-    [string]$Version = '6-sol-gemini3.8flash',
+    [string]$Version = '6.1-sol-gemini3.8flash',
 
     [ValidateNotNullOrEmpty()]
     [string]$DestinationRoot = $(if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME '.codex' }),

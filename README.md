@@ -2,7 +2,7 @@
 
 Windows 11 上的 Codex 委派技能。主代理負責架構、整合與驗收，預設將可完整交接的工作委派給已登入 Antigravity 的 Gemini 3.8 Flash Medium，並在需要原生 Codex 能力時使用 Luna High 或 Sol Medium。依任務需要可選用 Gemini High、Luna Max、Sol High 或 Sol xHigh。
 
-目前版本：`6-sol-gemini3.8flash`。
+目前版本：`6.1-sol-gemini3.8flash`。
 
 ## 安裝
 
@@ -44,11 +44,11 @@ Unblock-File -LiteralPath ./install.ps1
 | --- | --- | --- |
 | 可完整交接、Antigravity 工具足以完成的研究、分析、實作、審查 | Gemini 3.8 Flash Medium | High：深入推理、知識整合或較多不確定性 |
 | 需要原生 Codex 工具或上下文，結果容易核對的證據蒐集與明確修改 | GPT-6 Luna High | Max：範圍有限的判斷，細微錯誤會造成主代理大量返工；優先承接可並行的工作 |
-| 需要原生 Codex 工具或上下文、路徑清楚的多步工作 | GPT-6 Sol Medium | High：複雜除錯、跨模組追蹤、假設與邊界條件分析；xHigh：需持續檢驗多個假設或釐清矛盾證據的困難子任務 |
+| 需要原生 Codex 工具或上下文、路徑清楚的多步工作 | GPT-6.1 Sol Medium | High：複雜除錯、跨模組追蹤、假設與邊界條件分析；xHigh：需持續檢驗多個假設或釐清矛盾證據的困難子任務 |
 
 主代理沿用使用者選定的模型與 effort，負責架構、整合與最終驗收。委派時依任務直接選用合適的配置；Luna Max 與 Sol Medium 依工作範圍及協調需求區分。
 
-原生子代理在 spawn 時明確指定模型與 effort。選擇有疑義時查閱 [models.md](versions/6-sol-gemini3.8flash/skills/model-routing-and-delegation-agy/references/models.md)；完整數據、來源與比較範圍在 [benchmarks.md](versions/6-sol-gemini3.8flash/skills/model-routing-and-delegation-agy/references/benchmarks.md)。跨模型比較使用共同的 10 項（13 profiles）或 27 項（4 profiles）評測資料，各模型獨立的 effort 保留率僅用於同模型內比較。Weighted Cost Index 越低越好，指數點差不代表實際費用或額度的節省比例。
+原生子代理在 spawn 時明確指定模型與 effort。選擇有疑義時查閱 [models.md](versions/6.1-sol-gemini3.8flash/skills/model-routing-and-delegation-agy/references/models.md)；完整數據、來源與比較範圍在 [benchmarks.md](versions/6.1-sol-gemini3.8flash/skills/model-routing-and-delegation-agy/references/benchmarks.md)。跨模型比較使用共同的 10 項（13 profiles）或 27 項（4 profiles）評測資料，各模型獨立的 effort 保留率僅用於同模型內比較。Weighted Cost Index 越低越好，指數點差不代表實際費用或額度的節省比例。
 
 委派 Gemini 前，主代理以一句話交代模型、effort 與任務；結果返回後，在下一則必要更新交代結果或阻礙，並區分工作完成與主代理驗收。同批任務合併提示。
 
@@ -62,14 +62,14 @@ $runner = Join-Path $codexRoot 'scripts/Invoke-AntigravityAgent.ps1'
 
 `$worktree` 是乾淨、專用的 linked Git worktree 根目錄；`$contract` 是位於該 worktree 外的 UTF-8 任務檔。High 使用 `-Model gemini-3.8-flash-high`。runner 回傳精簡 JSON，完整結果與診斷存放於各次執行的本機目錄。主代理檢查退出碼、狀態及產物，再整合結果。工作目錄隔離不等於檔案系統沙箱，`-AutoApprove` 會允許 Antigravity 自動執行工具。
 
-參數、回傳欄位與排錯請見 [Antigravity operations](versions/6-sol-gemini3.8flash/skills/model-routing-and-delegation-agy/references/antigravity.md)。
+參數、回傳欄位與排錯請見 [Antigravity operations](versions/6.1-sol-gemini3.8flash/skills/model-routing-and-delegation-agy/references/antigravity.md)。
 
 ## 設計與檔案
 
 [架構說明](docs/architecture.md) 記錄技能、AGENTS.md、原生 TOML、CLI、SDK、自訂 provider 與 MCP 的選擇依據，並連結官方文件。
 
 ```text
-versions/6-sol-gemini3.8flash/
+versions/6.1-sol-gemini3.8flash/
 ├─ AGENTS.md
 ├─ scripts/Invoke-AntigravityAgent.ps1
 └─ skills/model-routing-and-delegation-agy/
@@ -81,7 +81,7 @@ versions/6-sol-gemini3.8flash/
       └─ antigravity.md
 ```
 
-歷史配置保留在 `versions/6-gemini3.8flash/` 與 `versions/5.6*/`。版本目錄區分模型組合及路由配置。
+歷史配置保留在 `versions/6-sol-gemini3.8flash/`、`versions/6-gemini3.8flash/` 與 `versions/5.6*/`。版本目錄區分模型組合及路由配置。
 
 ## 驗證
 

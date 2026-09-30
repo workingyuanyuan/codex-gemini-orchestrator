@@ -24,7 +24,7 @@ function Assert-SequenceEqual {
 }
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
-$wrapperPath = Join-Path $repositoryRoot 'versions\6-sol-gemini3.8flash\scripts\Invoke-AntigravityAgent.ps1'
+$wrapperPath = Join-Path $repositoryRoot 'versions\6.1-sol-gemini3.8flash\scripts\Invoke-AntigravityAgent.ps1'
 if (-not (Test-Path -LiteralPath $wrapperPath -PathType Leaf)) {
     throw "Wrapper under test not found at: $wrapperPath"
 }

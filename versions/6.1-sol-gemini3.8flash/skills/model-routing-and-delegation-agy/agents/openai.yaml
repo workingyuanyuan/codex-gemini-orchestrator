@@ -1,0 +1,4 @@
+interface:
+  display_name: "Model Routing and Delegation (AGY)"
+  short_description: "Delegate with Gemini, Sol, or Luna"
+  default_prompt: "Use $model-routing-and-delegation-agy to delegate the independent parts of this task."

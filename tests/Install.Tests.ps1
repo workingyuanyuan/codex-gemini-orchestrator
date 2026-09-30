@@ -13,7 +13,7 @@ $destination = Join-Path $testRoot '.codex'
 $previousCodexHome = $env:CODEX_HOME
 try {
     & $installer -DestinationRoot $destination
-    $snapshot = Join-Path $repositoryRoot 'versions/6-sol-gemini3.8flash'
+    $snapshot = Join-Path $repositoryRoot 'versions/6.1-sol-gemini3.8flash'
     $sourceFiles = @(Get-ChildItem (Join-Path $snapshot 'scripts'), (Join-Path $snapshot 'skills') -Recurse -File)
     foreach ($file in $sourceFiles) {
         $relative = [IO.Path]::GetRelativePath($snapshot, $file.FullName)
