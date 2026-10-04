@@ -1,42 +1,46 @@
 ---
 name: model-routing-and-delegation-agy
-description: Delegate independent, verifiable work through Gemini or native Codex subagents.
+description: Delegate independent, verifiable work through Gemini and Antigravity capabilities or native Codex subagents.
 ---
 
 # Delegation
 
 Keep requirements, architectural decisions, integration, and final acceptance with the main agent. Delegate bounded work when its useful output justifies the handoff and review; continue independent work while it runs.
 
+If this skill causes you to seek permission or confirmation, pause, leave requested work unfinished, or diverge from the user's intent, name and link the exact `SKILL.md` you read, quote the relevant instruction, and explain how it applies. Distinguish explicit requirements from your interpretation.
+
 ## Select a worker
 
-Prefer Gemini for self-contained research, analysis, implementation, and review that Antigravity can complete with its tools. Choose a native worker when the task needs Codex tools or context, or an observed capability gap makes that worker a better fit.
+Prefer Gemini for self-contained research, analysis, implementation, and review that Antigravity can complete with its native tools. Choose a native worker when the task needs Codex tools or context, or an observed capability gap makes that worker a better fit.
 
 | Worker | Default effort and task fit | Choose higher effort when |
 | --- | --- | --- |
 | Gemini 3.8 Flash | `medium`: self-contained work with a clear deliverable | `high`: deeper reasoning, knowledge synthesis, or substantial uncertainty |
-| GPT-6 Luna | `high`: native evidence gathering and straightforward changes whose correctness is quick to check | `max`: bounded judgment where subtle mistakes would cause substantial rework |
-| GPT-6.1 Sol | `medium`: native multi-step work with a clear path | `high`: complex debugging, cross-module tracing, assumptions, or edge cases; `xhigh`: difficult bounded assignments requiring sustained testing of competing hypotheses or reconciliation of conflicting evidence |
+| GPT-6 Luna | `high`: native data extraction and mechanical edits with an explicit specification | `max`: bounded judgment where subtle mistakes would cause substantial rework |
+| GPT-6.1 Sol | `medium`: default for general native work, including multi-step implementation with a clear path | `high`: complex debugging, cross-module tracing, assumptions, or edge cases |
 
-Choose the appropriate effort at dispatch; higher effort does not require a failed default attempt. Prefer Luna max for work that can run independently of the main agent's next step. Distinguish Luna max from Sol medium by scope and coordination needs. Read [model selection evidence](references/models.md) only when task fit is unclear or routing is being reviewed.
+Read [model selection evidence](references/models.md) when task fit is unclear or routing is being reviewed.
 
-For native workers, explicitly set `model` (`gpt-6-luna` or `gpt-6.1-sol`) and `reasoning_effort` from the table. With `collaboration.spawn_agent`, use `fork_turns: "none"` and a self-contained handoff; include limited history only when necessary and supported. Avoid custom agent configurations that override the selected model or effort. Honor the runtime's available models and controls; if a route is unavailable, report it and choose a suitable available worker or the main agent. Keep the main agent's model and effort.
+For native workers, explicitly set `model` (`gpt-6-luna` or `gpt-6.1-sol`) and `reasoning_effort` from the table. With `collaboration.spawn_agent`, set `fork_turns: "none"`; summarize necessary prior decisions and evidence in the handoff. Check returned model and effort metadata when available. If the runtime cannot honor the selected configuration, choose a suitable supported route or complete the work in the main agent.
+
+## Gemini and Antigravity capabilities
+
+Use the current Antigravity session's native tools and built-in workflows. Read the linked contract when preparing the corresponding assignment.
+
+| Capability and contract | Suitable assignments |
+| --- | --- |
+| [Writing and localization](references/gemini-capabilities.md#writing-and-localization) | README explanations, tutorials, product copy, terminology and translation |
+| [Multimodal understanding](references/gemini-capabilities.md#multimodal-understanding) | Inspect images and PDFs, analyze audio or video, correlate media with code |
+| [Web research](references/gemini-capabilities.md#public-web-research) | Find and synthesize public sources with native search and page-reading tools |
+| [Browser interaction](references/gemini-capabilities.md#browser-interaction) | Inspect rendered pages, reproduce UI behavior and collect screenshots through `/browser` |
+| [Boost](references/gemini-capabilities.md#boost) | Investigate competing hypotheses, solve difficult algorithms, or implement a bounded fix with independent verification through `/boost` |
 
 ## Handoff and acceptance
 
-Provide the objective, essential context or file locations, allowed changes, and observable acceptance criteria. Request a concise result with artifact/file references, validation evidence, and unresolved issues. Keep exploration logs with the worker. Give write tasks separate workspaces or disjoint ownership; serialize shared-interface changes. Tell workers to complete their assignment without further delegation and leave Git publication, releases, and deployment to the main agent.
+Provide a self-contained objective, essential context or file locations, allowed changes, and observable acceptance criteria. Request a concise result with artifact references, validation evidence, and unresolved issues. Apply output constraints while writing; report the requested result and necessary actions. Give write tasks separate workspaces or disjoint ownership; serialize shared-interface changes. Ordinary workers complete assignments directly; Browser and Boost may use their specified built-in workflows. Keep Git publication, releases, and deployment with the main agent.
 
-Review the relevant artifacts and evidence before integrating. Check consequential changes directly without repeating the worker's investigation. Diagnose incomplete results before retrying: correct missing context or environment defects, or select a worker suited to the unmet requirement. Retry a corrected context or environment failure once; if it repeats, use a suitable alternative or complete the task in the main agent.
+Review artifacts and evidence before integrating. Check consequential changes directly. For incomplete results, diagnose the unmet criteria and adjust the handoff, worker, or main-agent approach.
 
 ## Run Gemini
 
-Before dispatch, tell the user the Gemini model, effort, and task in one sentence. After it returns, include the outcome or blocker in the next necessary update, distinguishing returned work from accepted work. Combine notices for a batch of tasks.
-
-Use an authenticated Antigravity subscription session and a dedicated, clean linked Git worktree. Save the task as a UTF-8 file outside it. Include relevant uncommitted source changes in the worker's clean snapshot when needed. The worktree separates changes but is not a filesystem sandbox. For read-only work, prohibit writes in the task and verify a clean worktree afterward.
-
-Resolve `../../scripts/Invoke-AntigravityAgent.ps1` relative to this skill directory. Explicitly pass `-Model gemini-3.8-flash-medium` or `-Model gemini-3.8-flash-high`:
-
-```powershell
-& $runner -WorkingDirectory $worktree -PromptFile $contract -Model gemini-3.8-flash-medium -AutoApprove
-```
-
-The runner returns compact JSON with status, result, and paths to full output. Check its exit code and status, then evaluate the result and artifacts. Read full output when the result is truncated or evidence is missing. Retain artifacts until acceptance. For setup, parameters, permissions, or failures, read [Antigravity operations](references/antigravity.md).
+Before Gemini dispatch, read [Antigravity operations](references/antigravity.md) for setup, workspace requirements, invocation and recovery. Use the packaged runner for ordinary assignments. For Browser and Boost, follow [supervised streaming and conversation cleanup](references/antigravity.md#supervise-browser-and-boost), retaining the conversation ID and child evidence through completion or cancellation.
